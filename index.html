@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f7f7fb">
   <title>Card Show Planner</title>
-  <link rel="stylesheet" href="styles.css?v=4">
+  <link rel="stylesheet" href="styles.css?v=3">
 </head>
 <body>
   <header class="topbar">
@@ -49,27 +49,24 @@
 
     <section class="location-card card">
       <div class="section-head">
-        <div><h3>📍 Shows Near Me</h3><span class="muted">Choose how The Card Map finds your location.</span></div>
+        <div><h2>📍 Shows Near Me</h2><span class="muted">Find shows by distance from you.</span></div>
       </div>
       <div class="location-actions">
         <button id="useLocationBtn" type="button" class="primary">📍 Use my location</button>
         <div class="location-or">or</div>
-        <div class="location-entry">
-          <input id="placeInput" type="text" inputmode="text" autocomplete="postal-code" placeholder="Town or postcode">
-          <button id="placeBtn" type="button" class="secondary">Use this place</button>
+        <div class="place-row">
+          <input id="placeInput" type="text" placeholder="Town or postcode" autocomplete="postal-code">
+          <button id="setPlaceBtn" type="button" class="secondary">Set location</button>
         </div>
       </div>
-      <div class="distance-controls">
-        <label>
-          <span>Distance</span>
-          <select id="distanceSelect">
-            <option value="all">Any distance</option>
-            <option value="10">Within 10 miles</option>
-            <option value="25">Within 25 miles</option>
-            <option value="50">Within 50 miles</option>
-            <option value="100">Within 100 miles</option>
-          </select>
-        </label>
+      <div class="location-filter-row">
+        <label><span>Distance</span><select id="distanceSelect">
+          <option value="all">Any distance</option>
+          <option value="10">Within 10 miles</option>
+          <option value="25">Within 25 miles</option>
+          <option value="50">Within 50 miles</option>
+          <option value="100">Within 100 miles</option>
+        </select></label>
       </div>
       <p id="locationStatus" class="status"></p>
     </section>
@@ -152,6 +149,6 @@
   </dialog>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="app.js?v=4"></script>
+  <script src="app.js?v=3"></script>
 </body>
 </html>

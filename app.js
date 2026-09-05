@@ -256,27 +256,36 @@ async function lookupUserPlace(value) {
 
 async function loadEventCoordinates() {
   const postcodes = [...new Set(currentEvents.map(eventPostcode).filter(Boolean))];
-  if (!postcodes.length) return;
-  const missing = postcodes.filter(pc => !eventCoordinates[pc.toUpperCase()]);
-  if (missing.length) {
-    const res = await fetch("https://api.postcodes.io/postcodes?filter=postcode,latitude,longitude", {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({postcodes: missing})
-    });
-    if (!res.ok) throw new Error("We couldn't load show locations.");
-    const data = await res.json();
-    (data.result || []).forEach(row => {
-      if (row.result?.latitude != null && row.result?.longitude != null) {
-        eventCoordinates[row.query.toUpperCase()] = {
-          latitude: Number(row.result.latitude),
-          longitude: Number(row.result.longitude)
+  if (!postcodes.length) return 0;
+
+  let found = 0;
+  for (const pc of postcodes) {
+    const key = pc.toUpperCase();
+    if (eventCoordinates[key]) {
+      found++;
+      continue;
+    }
+
+    try {
+      const res = await fetch(`https://api.postcodes.io/postcodes/${encodeURIComponent(pc.replace(/\s+/g, ""))}`);
+      if (!res.ok) continue;
+      const data = await res.json();
+      const result = data.result;
+      if (result?.latitude != null && result?.longitude != null) {
+        eventCoordinates[key] = {
+          latitude: Number(result.latitude),
+          longitude: Number(result.longitude)
         };
+        found++;
       }
-    });
-    localStorage.setItem("csp_event_coordinates", JSON.stringify(eventCoordinates));
+    } catch (err) {
+      console.warn("Could not geocode show postcode", pc, err);
+    }
   }
-  distanceReady = true;
+
+  localStorage.setItem("csp_event_coordinates", JSON.stringify(eventCoordinates));
+  distanceReady = found > 0;
+  return found;
 }
 
 function getEventDistance(e) {
@@ -293,10 +302,14 @@ async function prepareDistances() {
       const place = await lookupUserPlace(userPlace);
       userLocation = { latitude: place.latitude, longitude: place.longitude, accuracy: null };
     }
-    await loadEventCoordinates();
+    const found = await loadEventCoordinates();
     render();
     const withDistance = currentEvents.filter(e => getEventDistance(e) != null).length;
-    setLocationStatus(`📍 Location set. Distance is ready for ${withDistance} of ${currentEvents.length} shows.`);
+    if (!found || !withDistance) {
+      setLocationStatus("📍 Your location is set, but we couldn't match the show postcodes yet. Try again in a moment.", true);
+      return;
+    }
+    setLocationStatus(`📍 Distance ready for ${withDistance} of ${currentEvents.length} shows.`);
   } catch (err) {
     distanceReady = false;
     setLocationStatus(err.message || "We couldn't calculate show distances. Try again.", true);
