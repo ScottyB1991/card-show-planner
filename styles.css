@@ -32,3 +32,4 @@
   .location-actions>.primary,.location-entry{width:100%}
   .location-entry .secondary{white-space:nowrap}
 }
+.distance-controls{margin-top:12px;max-width:280px}.distance-controls label span{display:block;font-size:12px;font-weight:700;margin:0 0 6px;color:#5d6068}.distance-controls select{width:100%}.distance-badge{display:inline-block;margin-top:6px;font-size:12px;font-weight:800;border-radius:999px;padding:5px 8px;background:#eef3ff;color:#303846}

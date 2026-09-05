@@ -8,6 +8,8 @@ let savedIds = new Set();
 let currentUser = null;
 let userLocation = null;
 let userPlace = localStorage.getItem("csp_user_place") || "";
+let eventCoordinates = JSON.parse(localStorage.getItem("csp_event_coordinates") || "{}");
+let distanceReady = false;
 
 const $ = (id) => document.getElementById(id);
 
@@ -46,7 +48,7 @@ async function connectSupabase() {
       ...e,
       city: e.city || e.location || "",
       venue: e.venue || e.address || "",
-      postcode: e.postcode || "",
+      postcode: e.postcode || extractPostcode(e.address || ""),
       region: e.region || "",
       ticket_url: e.ticket_url || e.website || "",
       source_url: e.source_url || e.website || "",
@@ -81,11 +83,14 @@ function render() {
   const q = $("searchInput").value.trim().toLowerCase();
   const region = $("regionSelect").value;
   const dateFilter = $("dateSelect").value;
+  const distanceFilter = $("distanceSelect")?.value || "all";
+  const maxMiles = distanceFilter === "all" ? Infinity : Number(distanceFilter);
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-  const filtered = currentEvents.filter(e => {
-    const hay = [e.name,e.city,e.venue,e.postcode,e.region].join(" ").toLowerCase();
+
+  let filtered = currentEvents.filter(e => {
+    const hay = [e.name,e.city,e.venue,e.postcode,e.region,e.address].join(" ").toLowerCase();
     const eventDate = e.date ? new Date(e.date + "T00:00:00") : null;
     let dateMatches = true;
     if (dateFilter !== "all") {
@@ -99,8 +104,22 @@ function render() {
         dateMatches = eventDate > monthEnd;
       }
     }
-    return (!q || hay.includes(q)) && (!region || e.region === region) && dateMatches;
+    const distance = getEventDistance(e);
+    const distanceMatches = maxMiles === Infinity || (distance != null && distance <= maxMiles);
+    return (!q || hay.includes(q)) && (!region || e.region === region) && dateMatches && distanceMatches;
   });
+
+  if (userLocation) {
+    filtered.sort((a,b) => {
+      const da = getEventDistance(a);
+      const db = getEventDistance(b);
+      if (da == null && db == null) return 0;
+      if (da == null) return 1;
+      if (db == null) return -1;
+      return da - db;
+    });
+  }
+
   $("countLabel").textContent = `${filtered.length} show${filtered.length === 1 ? "" : "s"}`;
   $("eventsList").innerHTML = filtered.length ? filtered.map(eventCard).join("") :
     `<div class="empty">No shows match those filters.</div>`;
@@ -117,7 +136,7 @@ function eventCard(e) {
       <span class="tag">${esc(e.pokemon_relevance || "Card show")}</span>
     </div>
     <div class="meta">${esc(e.venue || "")}${e.city ? ` · ${esc(e.city)}` : ""}${e.postcode ? ` · ${esc(e.postcode)}` : ""}<br>${esc(e.time || "")}${e.price ? ` · ${esc(e.price)}` : ""}</div>
-    <div class="tags">${e.region ? `<span class="tag">${esc(regionName(e.region))}</span>` : ""}</div>
+    <div class="tags">${e.region ? `<span class="tag">${esc(regionName(e.region))}</span>` : ""}${getEventDistance(e) != null ? `<span class="distance-badge">📍 ${getEventDistance(e).toFixed(1)} miles away</span>` : ""}</div>
     <div class="actions">
       <button class="${saved ? "secondary saved" : "secondary"}" onclick="toggleSave('${escAttr(key)}')">${saved ? "♥ Saved" : "♡ Save event"}</button>
       ${url !== "#" ? `<a class="primary" href="${escAttr(url)}" target="_blank" rel="noopener">Details</a>` : ""}
@@ -198,6 +217,92 @@ function showAuthMessage(message) {
 }
 
 
+
+function extractPostcode(value) {
+  const match = String(value || "").toUpperCase().match(/\b([A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2})\b/);
+  return match ? match[1].replace(/\s+/g, " ").trim() : "";
+}
+
+function eventPostcode(e) {
+  return e.postcode || extractPostcode(e.address || "");
+}
+
+function haversineMiles(lat1, lon1, lat2, lon2) {
+  const toRad = deg => deg * Math.PI / 180;
+  const R = 3958.7613;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a = Math.sin(dLat/2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon/2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+async function lookupUserPlace(value) {
+  const clean = value.trim();
+  const postcode = extractPostcode(clean);
+  if (postcode) {
+    const res = await fetch(`https://api.postcodes.io/postcodes/${encodeURIComponent(postcode.replace(/\s+/g, ""))}`);
+    if (!res.ok) throw new Error("That postcode couldn't be found.");
+    const data = await res.json();
+    return data.result ? { latitude: data.result.latitude, longitude: data.result.longitude, label: data.result.postcode } : null;
+  }
+  const res = await fetch(`https://api.postcodes.io/places?q=${encodeURIComponent(clean)}&limit=1`);
+  if (!res.ok) throw new Error("We couldn't find that place.");
+  const data = await res.json();
+  const place = data.result?.[0];
+  if (!place) throw new Error("We couldn't find that place. Try a town or postcode.");
+  return { latitude: Number(place.latitude), longitude: Number(place.longitude), label: place.name_1 };
+}
+
+async function loadEventCoordinates() {
+  const postcodes = [...new Set(currentEvents.map(eventPostcode).filter(Boolean))];
+  if (!postcodes.length) return;
+  const missing = postcodes.filter(pc => !eventCoordinates[pc.toUpperCase()]);
+  if (missing.length) {
+    const res = await fetch("https://api.postcodes.io/postcodes?filter=postcode,latitude,longitude", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({postcodes: missing})
+    });
+    if (!res.ok) throw new Error("We couldn't load show locations.");
+    const data = await res.json();
+    (data.result || []).forEach(row => {
+      if (row.result?.latitude != null && row.result?.longitude != null) {
+        eventCoordinates[row.query.toUpperCase()] = {
+          latitude: Number(row.result.latitude),
+          longitude: Number(row.result.longitude)
+        };
+      }
+    });
+    localStorage.setItem("csp_event_coordinates", JSON.stringify(eventCoordinates));
+  }
+  distanceReady = true;
+}
+
+function getEventDistance(e) {
+  if (!userLocation) return null;
+  const pc = eventPostcode(e);
+  const coords = pc ? eventCoordinates[pc.toUpperCase()] : null;
+  if (!coords) return null;
+  return haversineMiles(userLocation.latitude, userLocation.longitude, coords.latitude, coords.longitude);
+}
+
+async function prepareDistances() {
+  try {
+    if (userPlace && !userLocation) {
+      const place = await lookupUserPlace(userPlace);
+      userLocation = { latitude: place.latitude, longitude: place.longitude, accuracy: null };
+    }
+    await loadEventCoordinates();
+    render();
+    const withDistance = currentEvents.filter(e => getEventDistance(e) != null).length;
+    setLocationStatus(`📍 Location set. Distance is ready for ${withDistance} of ${currentEvents.length} shows.`);
+  } catch (err) {
+    distanceReady = false;
+    setLocationStatus(err.message || "We couldn't calculate show distances. Try again.", true);
+  }
+}
+
 function setLocationStatus(message, isError = false) {
   const el = $("locationStatus");
   if (!el) return;
@@ -220,7 +325,8 @@ function useMyLocation() {
       };
       userPlace = "";
       localStorage.removeItem("csp_user_place");
-      setLocationStatus("📍 Location found. We'll use it for accurate show distances in the next step.");
+      setLocationStatus("📍 Location found. Calculating show distances…");
+      prepareDistances();
     },
     (error) => {
       const messages = {
@@ -234,16 +340,24 @@ function useMyLocation() {
   );
 }
 
-function useEnteredPlace() {
+async function useEnteredPlace() {
   const value = $("placeInput").value.trim();
   if (!value) {
     setLocationStatus("Enter a town or postcode first.", true);
     return;
   }
   userPlace = value;
-  userLocation = null;
   localStorage.setItem("csp_user_place", value);
-  setLocationStatus(`📍 Location set to ${value}. We'll use it for accurate show distances in the next step.`);
+  setLocationStatus(`📍 Finding ${value}…`);
+  try {
+    const place = await lookupUserPlace(value);
+    userLocation = { latitude: place.latitude, longitude: place.longitude, accuracy: null };
+    setLocationStatus(`📍 Location set to ${place.label}. Calculating show distances…`);
+    await prepareDistances();
+  } catch (err) {
+    userLocation = null;
+    setLocationStatus(err.message || "We couldn't find that place.", true);
+  }
 }
 
 async function signInOrSignUp(mode) {
@@ -289,9 +403,10 @@ $("placeBtn").addEventListener("click", useEnteredPlace);
 $("placeInput").addEventListener("keydown", (ev) => {
   if (ev.key === "Enter") useEnteredPlace();
 });
+$("distanceSelect").addEventListener("change", render);
 if (userPlace) {
   $("placeInput").value = userPlace;
-  setLocationStatus(`📍 Location set to ${userPlace}. We'll use it for accurate show distances in the next step.`);
+  setLocationStatus(`📍 Location saved as ${userPlace}.`);
 }
 
 async function init() {
