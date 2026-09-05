@@ -13,7 +13,7 @@
       <div class="eyebrow">UK card shows</div>
       <h1>Card Show Planner</h1>
     </div>
-    <button id="settingsBtn" class="icon-btn" aria-label="Settings">⚙️</button>
+    <div class="top-actions"><button id="authBtn" class="small-btn">👤 Sign in</button><button id="settingsBtn" class="icon-btn" aria-label="Settings">⚙️</button></div>
   </header>
 
   <main>
@@ -67,6 +67,24 @@
         <button type="submit" class="primary">Save connection</button>
       </div>
       <p id="settingsStatus" class="status"></p>
+    </form>
+  </dialog>
+
+  <dialog id="authDialog">
+    <form method="dialog" class="dialog-card" id="authForm">
+      <div class="section-head">
+        <h2>Save your favourite shows</h2>
+        <button value="cancel" class="icon-btn">✕</button>
+      </div>
+      <p class="muted">Create a free account or sign in to save shows to your personal list.</p>
+      <label><span>Email</span><input id="authEmail" type="email" autocomplete="email" placeholder="you@example.com"></label>
+      <label><span>Password</span><input id="authPassword" type="password" autocomplete="current-password" placeholder="At least 6 characters"></label>
+      <div class="dialog-actions">
+        <button id="signInBtn" type="button" class="secondary">Sign in</button>
+        <button id="signUpBtn" type="button" class="primary">Create account</button>
+      </div>
+      <button id="signOutBtn" type="button" class="secondary signout">Sign out</button>
+      <p id="authStatus" class="status"></p>
     </form>
   </dialog>
 

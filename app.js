@@ -5,6 +5,7 @@ let demoEvents = [];
 let currentEvents = [];
 let supabaseClient = null;
 let savedIds = new Set();
+let currentUser = null;
 
 const $ = (id) => document.getElementById(id);
 
@@ -20,14 +21,37 @@ async function loadDemoEvents() {
   demoEvents = await res.json();
 }
 
+async function loadSavedEvents() {
+  savedIds = new Set();
+  currentUser = null;
+  if (!supabaseClient) return;
+  const { data: { user } } = await supabaseClient.auth.getUser();
+  currentUser = user || null;
+  if (!currentUser) return;
+  const { data, error } = await supabaseClient.from("saved_events").select("event_id").eq("user_id", currentUser.id);
+  if (error) { console.warn("Could not load saved events:", error); return; }
+  savedIds = new Set((data || []).map(row => String(row.event_id)));
+}
+
 async function connectSupabase() {
   const c = config();
   if (!c.url || !c.key || !window.supabase) return false;
   try {
     supabaseClient = window.supabase.createClient(c.url, c.key);
-    const { data, error } = await supabaseClient.from("Events").select("*").order("date", { ascending: true });
+    const { data, error } = await supabaseClient.from("events").select("*").order("date", { ascending: true });
     if (error) throw error;
-    currentEvents = data || [];
+    currentEvents = (data || []).map(e => ({
+      ...e,
+      city: e.city || e.location || "",
+      venue: e.venue || e.address || "",
+      postcode: e.postcode || "",
+      region: e.region || "",
+      ticket_url: e.ticket_url || e.website || "",
+      source_url: e.source_url || e.website || "",
+      pokemon_relevance: e.pokemon_relevance || "Card show"
+    }));
+    await loadSavedEvents();
+    updateAuthUI();
     $("connectionBadge").textContent = "Supabase connected";
     return true;
   } catch (e) {
@@ -90,7 +114,7 @@ async function toggleSave(key) {
   }
   const { data: authData } = await supabaseClient.auth.getUser();
   if (!authData?.user) {
-    alert("Sign in will be added next. For now, Supabase is connected but saving requires a signed-in user.");
+    $("authDialog").showModal();
     return;
   }
   const e = currentEvents.find(x => eventKey(x) === key);
@@ -107,6 +131,46 @@ async function toggleSave(key) {
   render();
 }
 
+function updateAuthUI() {
+  const btn = $("authBtn");
+  if (!btn) return;
+  btn.textContent = currentUser ? "👤 Account" : "👤 Sign in";
+}
+
+function showAuthMessage(message) {
+  $("authStatus").textContent = message;
+}
+
+async function signInOrSignUp(mode) {
+  if (!supabaseClient) return showAuthMessage("Connect Supabase first in Settings.");
+  const email = $("authEmail").value.trim();
+  const password = $("authPassword").value;
+  if (!email || !password) return showAuthMessage("Enter your email and password.");
+  showAuthMessage(mode === "signup" ? "Creating your account…" : "Signing you in…");
+  if (mode === "signup") {
+    const { data, error } = await supabaseClient.auth.signUp({
+      email, password, options: { emailRedirectTo: window.location.href.split("#")[0] }
+    });
+    if (error) return showAuthMessage(error.message);
+    if (data.session) {
+      await loadSavedEvents(); updateAuthUI(); render(); showAuthMessage("Account created and signed in.");
+    } else {
+      showAuthMessage("Account created. Check your email to confirm it, then sign in here.");
+    }
+  } else {
+    const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+    if (error) return showAuthMessage(error.message);
+    await loadSavedEvents(); updateAuthUI(); render(); showAuthMessage("Signed in successfully.");
+  }
+}
+
+async function signOut() {
+  if (!supabaseClient) return;
+  const { error } = await supabaseClient.auth.signOut();
+  if (error) return showAuthMessage(error.message);
+  savedIds = new Set(); currentUser = null; updateAuthUI(); render(); showAuthMessage("Signed out.");
+}
+
 function esc(v) { return String(v ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function escAttr(v) { return esc(v).replace(/`/g, "&#96;"); }
 
@@ -120,10 +184,24 @@ async function init() {
   const regions = [...new Set(currentEvents.map(e => e.region).filter(Boolean))].sort();
   $("regionSelect").innerHTML = `<option value="">All UK</option>` + regions.map(r => `<option value="${escAttr(r)}">${esc(regionName(r))}</option>`).join("");
   render();
+  if (supabaseClient) {
+    supabaseClient.auth.onAuthStateChange(async (_event, session) => {
+      currentUser = session?.user || null;
+      await loadSavedEvents();
+      updateAuthUI();
+      render();
+    });
+  }
 }
 
 $("searchInput").addEventListener("input", render);
 $("regionSelect").addEventListener("change", render);
+$("authBtn").addEventListener("click", () => {
+  if (currentUser) { $("authDialog").showModal(); } else { $("authDialog").showModal(); }
+});
+$("signInBtn").addEventListener("click", () => signInOrSignUp("signin"));
+$("signUpBtn").addEventListener("click", () => signInOrSignUp("signup"));
+$("signOutBtn").addEventListener("click", signOut);
 $("settingsBtn").addEventListener("click", () => {
   const c = config();
   $("supabaseUrl").value = c.url || PROJECT_URL_DEFAULT;
