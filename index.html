@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f7fb">
+  <title>Card Show Planner</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <div class="eyebrow">UK card shows</div>
+      <h1>Card Show Planner</h1>
+    </div>
+    <button id="settingsBtn" class="icon-btn" aria-label="Settings">⚙️</button>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div>
+        <h2>Find your next show</h2>
+        <p>Pokémon-friendly card shows, saved in one place.</p>
+      </div>
+      <div id="connectionBadge" class="badge">Demo data</div>
+    </section>
+
+    <section class="filters card">
+      <label>
+        <span>Search</span>
+        <input id="searchInput" type="search" placeholder="City, venue or show name">
+      </label>
+      <label>
+        <span>Region</span>
+        <select id="regionSelect">
+          <option value="">All UK</option>
+        </select>
+      </label>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <h2>Upcoming shows</h2>
+        <span id="countLabel"></span>
+      </div>
+      <div id="eventsList" class="events"></div>
+    </section>
+  </main>
+
+  <dialog id="settingsDialog">
+    <form method="dialog" class="dialog-card" id="settingsForm">
+      <div class="section-head">
+        <h2>Supabase connection</h2>
+        <button value="cancel" class="icon-btn">✕</button>
+      </div>
+      <p class="muted">Your publishable key stays on your device. Never paste a secret/service key here.</p>
+      <label>
+        <span>Project URL</span>
+        <input id="supabaseUrl" type="url" placeholder="https://your-project.supabase.co">
+      </label>
+      <label>
+        <span>Publishable key</span>
+        <input id="supabaseKey" type="password" placeholder="sb_publishable_…">
+      </label>
+      <div class="dialog-actions">
+        <button id="clearConfig" type="button" class="secondary">Use demo data</button>
+        <button type="submit" class="primary">Save connection</button>
+      </div>
+      <p id="settingsStatus" class="status"></p>
+    </form>
+  </dialog>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="app.js"></script>
+</body>
+</html>
