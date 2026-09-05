@@ -129,12 +129,49 @@ async function toggleSave(key) {
     savedIds.add(key);
   }
   render();
+  renderAccount();
 }
 
 function updateAuthUI() {
   const btn = $("authBtn");
   if (!btn) return;
   btn.textContent = currentUser ? "👤 Account" : "👤 Sign in";
+}
+
+function renderAccount() {
+  const email = $("accountEmail");
+  const list = $("savedEventsList");
+  const count = $("savedCount");
+  if (!email || !list || !count) return;
+  email.textContent = currentUser?.email || "Signed in";
+  const saved = currentEvents.filter(e => savedIds.has(eventKey(e)));
+  count.textContent = `${saved.length} show${saved.length === 1 ? "" : "s"}`;
+  if (!saved.length) {
+    list.innerHTML = `<div class="empty-saved">You haven't saved any shows yet.<br>Tap <strong>♡ Save event</strong> on a show to add it here.</div>`;
+    return;
+  }
+  list.innerHTML = saved.map(e => {
+    const url = e.ticket_url || e.source_url || "#";
+    return `<article class="saved-event">
+      <div class="saved-title">${esc(e.name || "Card show")}</div>
+      <div class="saved-meta">${formatDate(e.date)}${e.city ? ` · ${esc(e.city)}` : ""}${e.venue ? ` · ${esc(e.venue)}` : ""}</div>
+      <div class="saved-actions">
+        <button type="button" class="secondary" onclick="removeSavedFromAccount('${escAttr(eventKey(e))}')">♥ Saved</button>
+        ${url !== "#" ? `<a class="primary" href="${escAttr(url)}" target="_blank" rel="noopener">Details</a>` : ""}
+      </div>
+    </article>`;
+  }).join("");
+}
+
+async function removeSavedFromAccount(key) {
+  if (!currentUser || !supabaseClient) return;
+  const e = currentEvents.find(x => eventKey(x) === key);
+  if (!e) return;
+  const { error } = await supabaseClient.from("saved_events").delete().eq("event_id", e.id).eq("user_id", currentUser.id);
+  if (error) return alert(error.message);
+  savedIds.delete(key);
+  render();
+  renderAccount();
 }
 
 function showAuthMessage(message) {
@@ -153,14 +190,14 @@ async function signInOrSignUp(mode) {
     });
     if (error) return showAuthMessage(error.message);
     if (data.session) {
-      await loadSavedEvents(); updateAuthUI(); render(); showAuthMessage("Account created and signed in.");
+      await loadSavedEvents(); updateAuthUI(); render(); renderAccount(); showAuthMessage("Account created and signed in.");
     } else {
       showAuthMessage("Account created. Check your email to confirm it, then sign in here.");
     }
   } else {
     const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
     if (error) return showAuthMessage(error.message);
-    await loadSavedEvents(); updateAuthUI(); render(); showAuthMessage("Signed in successfully.");
+    await loadSavedEvents(); updateAuthUI(); render(); renderAccount(); showAuthMessage("Signed in successfully.");
   }
 }
 
@@ -168,7 +205,7 @@ async function signOut() {
   if (!supabaseClient) return;
   const { error } = await supabaseClient.auth.signOut();
   if (error) return showAuthMessage(error.message);
-  savedIds = new Set(); currentUser = null; updateAuthUI(); render(); showAuthMessage("Signed out.");
+  savedIds = new Set(); currentUser = null; updateAuthUI(); render(); renderAccount(); showAuthMessage("Signed out.");
 }
 
 function esc(v) { return String(v ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
@@ -190,6 +227,7 @@ async function init() {
       await loadSavedEvents();
       updateAuthUI();
       render();
+      renderAccount();
     });
   }
 }
@@ -197,11 +235,17 @@ async function init() {
 $("searchInput").addEventListener("input", render);
 $("regionSelect").addEventListener("change", render);
 $("authBtn").addEventListener("click", () => {
-  if (currentUser) { $("authDialog").showModal(); } else { $("authDialog").showModal(); }
+  if (currentUser) {
+    renderAccount();
+    $("accountDialog").showModal();
+  } else {
+    $("authDialog").showModal();
+  }
 });
 $("signInBtn").addEventListener("click", () => signInOrSignUp("signin"));
 $("signUpBtn").addEventListener("click", () => signInOrSignUp("signup"));
 $("signOutBtn").addEventListener("click", signOut);
+$("accountSignOutBtn").addEventListener("click", async () => { await signOut(); $("accountDialog").close(); });
 $("settingsBtn").addEventListener("click", () => {
   const c = config();
   $("supabaseUrl").value = c.url || PROJECT_URL_DEFAULT;

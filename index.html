@@ -70,6 +70,33 @@
     </form>
   </dialog>
 
+
+  <dialog id="accountDialog">
+    <form method="dialog" class="dialog-card account-card" id="accountForm">
+      <div class="section-head">
+        <div><div class="eyebrow">Your personal card-show hub</div><h2>My Card Map</h2></div>
+        <button value="cancel" class="icon-btn">✕</button>
+      </div>
+      <div class="account-summary">
+        <div class="account-avatar">👤</div>
+        <div><strong id="accountEmail">Signed in</strong><div class="muted">Your saved shows stay linked to your account.</div></div>
+      </div>
+      <section class="saved-section">
+        <div class="section-head"><h3>❤️ My Saved Shows</h3><span id="savedCount"></span></div>
+        <div id="savedEventsList" class="saved-events"></div>
+      </section>
+      <div class="future-card">
+        <strong>🔔 Reminders</strong>
+        <span>Coming soon — we'll help you keep track of the shows you don't want to miss.</span>
+      </div>
+      <div class="future-card">
+        <strong>⭐ Favourites & preferences</strong>
+        <span>Coming soon — personalise The Card Map around the cards and shows you love.</span>
+      </div>
+      <button id="accountSignOutBtn" type="button" class="secondary signout">Sign out</button>
+    </form>
+  </dialog>
+
   <dialog id="authDialog">
     <form method="dialog" class="dialog-card" id="authForm">
       <div class="section-head">
