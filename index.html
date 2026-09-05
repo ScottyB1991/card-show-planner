@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f7f7fb">
   <title>Card Show Planner</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=3">
 </head>
 <body>
   <header class="topbar">
@@ -34,6 +34,15 @@
         <span>Region</span>
         <select id="regionSelect">
           <option value="">All UK</option>
+        </select>
+      </label>
+      <label>
+        <span>Date</span>
+        <select id="dateSelect">
+          <option value="upcoming">Upcoming</option>
+          <option value="month">This month</option>
+          <option value="later">Later</option>
+          <option value="all">All dates</option>
         </select>
       </label>
     </section>
@@ -116,6 +125,6 @@
   </dialog>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="app.js"></script>
+  <script src="app.js?v=3"></script>
 </body>
 </html>

@@ -13,3 +13,8 @@
 .empty-saved{padding:18px 10px;text-align:center;border:1px dashed #d7d7df;border-radius:14px;color:#777}
 .future-card{display:flex;flex-direction:column;gap:3px;padding:12px;margin-top:10px;border-radius:14px;background:#f7f7fb;border:1px solid #e6e6ed;font-size:13px}
 .future-card span{color:#6d6d76;font-size:12px;line-height:1.45}
+
+
+/* Search and date filter layout */
+.filters { display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 10px; }
+@media (max-width: 640px) { .filters { grid-template-columns: 1fr; } }

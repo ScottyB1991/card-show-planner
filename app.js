@@ -78,9 +78,26 @@ function eventKey(e) {
 function render() {
   const q = $("searchInput").value.trim().toLowerCase();
   const region = $("regionSelect").value;
+  const dateFilter = $("dateSelect").value;
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
   const filtered = currentEvents.filter(e => {
     const hay = [e.name,e.city,e.venue,e.postcode,e.region].join(" ").toLowerCase();
-    return (!q || hay.includes(q)) && (!region || e.region === region);
+    const eventDate = e.date ? new Date(e.date + "T00:00:00") : null;
+    let dateMatches = true;
+    if (dateFilter !== "all") {
+      if (!eventDate || Number.isNaN(eventDate.getTime())) {
+        dateMatches = false;
+      } else if (dateFilter === "upcoming") {
+        dateMatches = eventDate >= today;
+      } else if (dateFilter === "month") {
+        dateMatches = eventDate >= today && eventDate <= monthEnd;
+      } else if (dateFilter === "later") {
+        dateMatches = eventDate > monthEnd;
+      }
+    }
+    return (!q || hay.includes(q)) && (!region || e.region === region) && dateMatches;
   });
   $("countLabel").textContent = `${filtered.length} show${filtered.length === 1 ? "" : "s"}`;
   $("eventsList").innerHTML = filtered.length ? filtered.map(eventCard).join("") :
@@ -198,6 +215,10 @@ async function signInOrSignUp(mode) {
     const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
     if (error) return showAuthMessage(error.message);
     await loadSavedEvents(); updateAuthUI(); render(); renderAccount(); showAuthMessage("Signed in successfully.");
+    setTimeout(() => {
+      if ($("authDialog").open) $("authDialog").close();
+      if (currentUser) { renderAccount(); $("accountDialog").showModal(); }
+    }, 350);
   }
 }
 
@@ -234,8 +255,17 @@ async function init() {
 
 $("searchInput").addEventListener("input", render);
 $("regionSelect").addEventListener("change", render);
-$("authBtn").addEventListener("click", () => {
+$("dateSelect").addEventListener("change", render);
+$("authBtn").addEventListener("click", async () => {
+  if (!supabaseClient) {
+    $("authDialog").showModal();
+    return;
+  }
+  const { data: { user } } = await supabaseClient.auth.getUser();
+  currentUser = user || null;
+  updateAuthUI();
   if (currentUser) {
+    await loadSavedEvents();
     renderAccount();
     $("accountDialog").showModal();
   } else {
