@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f7f7fb">
   <title>Card Show Planner</title>
-  <link rel="stylesheet" href="styles.css?v=3">
+  <link rel="stylesheet" href="styles.css?v=4">
 </head>
 <body>
   <header class="topbar">
@@ -45,6 +45,21 @@
           <option value="all">All dates</option>
         </select>
       </label>
+    </section>
+
+    <section class="location-card card">
+      <div class="section-head">
+        <div><h3>📍 Shows Near Me</h3><span class="muted">Choose how The Card Map finds your location.</span></div>
+      </div>
+      <div class="location-actions">
+        <button id="useLocationBtn" type="button" class="primary">📍 Use my location</button>
+        <div class="location-or">or</div>
+        <div class="location-entry">
+          <input id="placeInput" type="text" inputmode="text" autocomplete="postal-code" placeholder="Town or postcode">
+          <button id="placeBtn" type="button" class="secondary">Use this place</button>
+        </div>
+      </div>
+      <p id="locationStatus" class="status"></p>
     </section>
 
     <section>
@@ -125,6 +140,6 @@
   </dialog>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="app.js?v=3"></script>
+  <script src="app.js?v=4"></script>
 </body>
 </html>

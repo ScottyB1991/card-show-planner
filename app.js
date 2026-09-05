@@ -6,6 +6,8 @@ let currentEvents = [];
 let supabaseClient = null;
 let savedIds = new Set();
 let currentUser = null;
+let userLocation = null;
+let userPlace = localStorage.getItem("csp_user_place") || "";
 
 const $ = (id) => document.getElementById(id);
 
@@ -195,6 +197,55 @@ function showAuthMessage(message) {
   $("authStatus").textContent = message;
 }
 
+
+function setLocationStatus(message, isError = false) {
+  const el = $("locationStatus");
+  if (!el) return;
+  el.textContent = message;
+  el.classList.toggle("error", isError);
+}
+
+function useMyLocation() {
+  if (!navigator.geolocation) {
+    setLocationStatus("Location isn't available in this browser. You can enter a town or postcode instead.", true);
+    return;
+  }
+  setLocationStatus("Finding your location…");
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      userLocation = {
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+        accuracy: position.coords.accuracy
+      };
+      userPlace = "";
+      localStorage.removeItem("csp_user_place");
+      setLocationStatus("📍 Location found. We'll use it for accurate show distances in the next step.");
+    },
+    (error) => {
+      const messages = {
+        1: "Location permission was declined. You can enter a town or postcode instead.",
+        2: "We couldn't determine your location. Try again or enter a town/postcode.",
+        3: "Location took too long. Try again or enter a town/postcode."
+      };
+      setLocationStatus(messages[error.code] || "We couldn't determine your location. Try again or enter a town/postcode.", true);
+    },
+    { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 }
+  );
+}
+
+function useEnteredPlace() {
+  const value = $("placeInput").value.trim();
+  if (!value) {
+    setLocationStatus("Enter a town or postcode first.", true);
+    return;
+  }
+  userPlace = value;
+  userLocation = null;
+  localStorage.setItem("csp_user_place", value);
+  setLocationStatus(`📍 Location set to ${value}. We'll use it for accurate show distances in the next step.`);
+}
+
 async function signInOrSignUp(mode) {
   if (!supabaseClient) return showAuthMessage("Connect Supabase first in Settings.");
   const email = $("authEmail").value.trim();
@@ -231,6 +282,17 @@ async function signOut() {
 
 function esc(v) { return String(v ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function escAttr(v) { return esc(v).replace(/`/g, "&#96;"); }
+
+
+$("useLocationBtn").addEventListener("click", useMyLocation);
+$("placeBtn").addEventListener("click", useEnteredPlace);
+$("placeInput").addEventListener("keydown", (ev) => {
+  if (ev.key === "Enter") useEnteredPlace();
+});
+if (userPlace) {
+  $("placeInput").value = userPlace;
+  setLocationStatus(`📍 Location set to ${userPlace}. We'll use it for accurate show distances in the next step.`);
+}
 
 async function init() {
   await loadDemoEvents();

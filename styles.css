@@ -18,3 +18,17 @@
 /* Search and date filter layout */
 .filters { display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 10px; }
 @media (max-width: 640px) { .filters { grid-template-columns: 1fr; } }
+
+/* Shows Near Me */
+.location-card{margin-top:12px}
+.location-card h3{margin:0 0 4px}
+.location-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.location-or{font-size:12px;color:#777}
+.location-entry{display:flex;gap:8px;flex:1 1 260px}
+.location-entry input{flex:1;min-width:0}
+.location-card .status{margin:8px 0 0}
+@media (max-width:520px){
+  .location-actions{align-items:stretch}
+  .location-actions>.primary,.location-entry{width:100%}
+  .location-entry .secondary{white-space:nowrap}
+}
