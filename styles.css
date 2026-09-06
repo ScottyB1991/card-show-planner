@@ -21,3 +21,12 @@
 
 
 .location-card{margin:16px 0}.location-actions{display:grid;gap:10px}.location-or{text-align:center;color:#777;font-size:12px}.place-row{display:grid;grid-template-columns:1fr auto;gap:8px}.place-row input{min-width:0}.location-filter-row{margin-top:12px}.location-filter-row label{display:block}.location-filter-row select{width:100%}.distance-badge{display:inline-block;margin-left:6px}.status.error{color:#b42318}.location-card .status{margin:10px 0 0}
+
+.brand-tagline{
+  display:block;
+  margin-top:2px;
+  font-size:.72em;
+  font-weight:600;
+  opacity:.72;
+  letter-spacing:.02em;
+}
