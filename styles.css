@@ -30,3 +30,49 @@
   opacity:.72;
   letter-spacing:.02em;
 }
+
+/* The Card Map — show card polish */
+.event-card,
+.show-card,
+.card {
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.event-card {
+  transition: transform .16s ease, box-shadow .16s ease;
+}
+
+.event-card:hover {
+  transform: translateY(-2px);
+}
+
+.event-card h3,
+.show-card h3 {
+  line-height: 1.2;
+  margin-bottom: .45rem;
+}
+
+.event-card .meta,
+.show-card .meta {
+  line-height: 1.45;
+}
+
+.event-card button,
+.show-card button {
+  min-height: 42px;
+  border-radius: 12px;
+  font-weight: 700;
+}
+
+@media (max-width: 640px) {
+  .event-card,
+  .show-card {
+    border-radius: 16px;
+  }
+
+  .event-card button,
+  .show-card button {
+    width: 100%;
+  }
+}
