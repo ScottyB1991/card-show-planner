@@ -344,3 +344,51 @@ body{overflow-x:hidden}
 .status-choice.active{background:#5c5c64;color:#fff;border-color:#8b8b96;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
 .next-show-empty{font-size:13px;line-height:1.45;color:#bdbdc6}
 @media(max-width:560px){.show-status-picker{grid-template-columns:1fr;gap:5px}.status-choice{min-height:40px;font-size:12px}}
+
+/* The Card Map — compact personal tracker polish */
+.show-status-picker{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:7px;
+  margin:10px 0 12px;
+  padding:4px;
+  border:1px solid #45454d;
+  border-radius:14px;
+  background:#18181c;
+}
+.status-choice{
+  min-width:0;
+  min-height:42px;
+  padding:8px 5px;
+  border:1px solid transparent;
+  border-radius:10px;
+  background:transparent;
+  color:#aaaab4;
+  font-size:11px;
+  line-height:1.15;
+  font-weight:850;
+  white-space:nowrap;
+  box-shadow:none;
+  transition:background .15s ease,border-color .15s ease,color .15s ease,transform .15s ease;
+}
+.status-choice:active{transform:scale(.98)}
+.status-choice.active{
+  background:#5d5d66;
+  color:#fff;
+  border-color:#777782;
+  box-shadow:0 2px 8px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.08);
+}
+.saved-event{border-radius:16px}
+.saved-event .saved-actions{margin-top:9px}
+.saved-event .saved-actions a,.saved-event .saved-actions button{border-radius:11px}
+
+@media(max-width:560px){
+  .show-status-picker{grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;padding:4px}
+  .status-choice{min-height:40px;padding:7px 2px;font-size:10.5px;letter-spacing:-.01em}
+  .saved-event{padding:12px}
+  .saved-event h3{font-size:16px;line-height:1.2}
+  .saved-event .meta{font-size:12px;line-height:1.35}
+}
+
+@media(max-width:360px){
+  .status-choice{font-size:9.5px}
+}
