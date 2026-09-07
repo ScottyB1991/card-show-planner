@@ -229,7 +229,20 @@ function ensureMap() {
     maxZoom: 18,
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
   }).addTo(showsMap);
-  showMarkersLayer = L.layerGroup().addTo(showsMap);
+  // Cluster nearby show pins when zoomed out. If the optional clustering
+  // library ever fails to load, fall back to the normal marker layer so
+  // Map View still works rather than taking the app down.
+  showMarkersLayer = typeof L.markerClusterGroup === "function"
+    ? L.markerClusterGroup({
+        showCoverageOnHover: false,
+        zoomToBoundsOnClick: true,
+        spiderfyOnMaxZoom: true,
+        removeOutsideVisibleBounds: true,
+        maxClusterRadius: 52,
+        disableClusteringAtZoom: 12
+      })
+    : L.layerGroup();
+  showMarkersLayer.addTo(showsMap);
   return true;
 }
 

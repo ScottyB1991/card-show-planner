@@ -313,3 +313,9 @@ body{overflow-x:hidden}
   .view-btn{padding:7px 10px;min-height:36px}
   .shows-map{height:62vh;min-height:390px;border-radius:16px}
 }
+
+
+/* The Card Map — clustered map pins */
+.marker-cluster-small,.marker-cluster-medium,.marker-cluster-large{background:rgba(23,23,27,.16)}
+.marker-cluster-small div,.marker-cluster-medium div,.marker-cluster-large div{background:#17171b;color:#fff;font-weight:900;box-shadow:0 2px 8px rgba(0,0,0,.18)}
+.marker-cluster span{font-size:12px}
