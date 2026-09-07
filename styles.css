@@ -217,3 +217,75 @@
 .location-card .primary,.location-card .secondary{min-height:44px;border:0;border-radius:12px;padding:10px 12px;cursor:pointer;font-weight:750}
 .location-card .secondary{border:1px solid #dddde5}
 @media(max-width:640px){.place-row{grid-template-columns:1fr}.location-card button{width:100%}}
+
+/* The Card Map — mobile polish pass */
+:root{--tap:46px}
+html{-webkit-text-size-adjust:100%}
+body{overflow-x:hidden}
+.topbar{padding-top:max(18px,env(safe-area-inset-top));gap:10px}
+.top-actions{flex-wrap:wrap;justify-content:flex-end}
+.small-btn{min-height:38px}
+.hero{box-shadow:0 8px 28px rgba(20,20,30,.045)}
+.filters.card,.location-card.card{padding:16px}
+.filters input,.filters select,.location-card input,.location-card select{min-height:46px}
+.section-head{margin-top:4px}
+.event{box-shadow:0 6px 20px rgba(0,0,0,.055)}
+.event .actions button,.event .actions a{display:grid;place-items:center}
+.dialog-card{max-height:90dvh;overflow:auto}
+.dialog-actions button,.details-actions a,.details-actions button{min-height:var(--tap)}
+
+@media(max-width:640px){
+  .topbar{padding-left:14px;padding-right:14px;align-items:flex-start}
+  .eyebrow{font-size:10px}
+  h1{font-size:22px;line-height:1.08}
+  .brand-tagline{font-size:.66em}
+  .top-actions{gap:3px}
+  .small-btn{font-size:11px;padding:7px 9px}
+  .icon-btn{padding:6px}
+  main{padding:6px 12px calc(28px + env(safe-area-inset-bottom))}
+  .hero{margin:8px 0 12px;padding:16px;border-radius:18px}
+  .hero h2{font-size:21px;line-height:1.15}
+  .hero p{font-size:14px;line-height:1.45}
+  .badge{margin-top:10px;padding:6px 9px}
+  .filters{gap:9px;margin-bottom:14px;padding:13px!important;border-radius:16px}
+  label span{margin-bottom:5px}
+  input,select{font-size:16px;padding:10px 11px}
+  .location-card{margin:12px 0;padding:13px!important;border-radius:16px}
+  .location-card .muted{margin-top:4px}
+  .location-actions{gap:8px}
+  .location-or{margin:-1px 0}
+  .location-filter-row{margin-top:9px}
+  .section-head{align-items:baseline;margin:4px 1px 2px}
+  .section-head h2{font-size:17px;margin-bottom:8px}
+  .events{gap:10px}
+  .event{padding:14px;border-radius:16px;box-shadow:0 5px 16px rgba(0,0,0,.05)}
+  .event:hover{transform:none}
+  .event h3{font-size:17px;line-height:1.22}
+  .date{margin-top:7px;font-size:14px}
+  .meta{font-size:12.5px}
+  .tags{gap:5px;margin:8px 0}
+  .tag{font-size:10.5px;padding:4px 7px}
+  .event .actions{gap:7px;margin-top:10px}
+  .event .actions button,.event .actions a{min-height:44px;padding:9px 11px}
+  .dialog-card{width:calc(100vw - 18px);padding:17px;border-radius:18px;max-height:92dvh}
+  .details-body h2{font-size:21px;margin-right:2.2rem}
+  .details-description{font-size:14px;line-height:1.55}
+  .details-actions{gap:7px}
+  .account-card{width:calc(100vw - 18px);padding:15px;max-height:92dvh}
+  .account-summary{padding:10px;margin:8px 0 12px}
+  .next-show-card{margin:10px 0 14px;padding:14px;border-width:1.5px;border-radius:15px}
+  .next-show-title{font-size:19px}
+  .next-show-meta{margin-bottom:10px}
+  .next-show-actions{gap:7px}
+  .next-show-actions a,.next-show-actions button{min-height:44px;border-radius:11px}
+  .saved-events{gap:8px}
+  .saved-event{padding:10px 11px}
+  .saved-event .saved-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+  .saved-event .saved-actions a,.saved-event .saved-actions button{width:100%;min-height:40px;text-align:center}
+  .saved-event .saved-actions>*:last-child:nth-child(odd){grid-column:1/-1}
+}
+
+@media(max-width:380px){
+  .topbar{display:block}
+  .top-actions{justify-content:flex-start;margin-top:9px}
+}
