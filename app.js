@@ -106,6 +106,49 @@ function render() {
     `<div class="empty">No shows match those filters.</div>`;
 }
 
+
+function openDetails(key) {
+  const e = currentEvents.find(x => eventKey(x) === key);
+  if (!e) return;
+
+  const dialog = $("detailsDialog");
+  const content = $("detailsContent");
+  if (!dialog || !content) return;
+
+  const saved = savedIds.has(key);
+  const url = e.ticket_url || e.source_url || "";
+  const dateText = e.date ? new Date(e.date + "T00:00:00").toLocaleDateString(undefined, {
+    weekday: "long", day: "numeric", month: "long", year: "numeric"
+  }) : "Date TBC";
+
+  content.innerHTML = `
+    <div class="details-body">
+      <h2>${esc(e.name || "Card show")}</h2>
+      <div class="details-meta">
+        <div>📅 <strong>${esc(dateText)}</strong></div>
+        ${e.city ? `<div>📍 ${esc(e.city)}</div>` : ""}
+        ${e.venue ? `<div>🏢 ${esc(e.venue)}</div>` : ""}
+        ${e.postcode ? `<div>📮 ${esc(e.postcode)}</div>` : ""}
+      </div>
+      ${e.description ? `<div class="details-description">${esc(e.description)}</div>` : ""}
+      <div class="details-actions">
+        <button class="primary" data-save-detail="${escAttr(key)}">${saved ? "♥ Saved to My Card Map" : "♡ Save event"}</button>
+        ${url ? `<a class="primary" href="${escAttr(url)}" target="_blank" rel="noopener">🔗 Show website / tickets</a>` : ""}
+      </div>
+    </div>
+  `;
+
+  dialog.showModal();
+
+  const saveBtn = content.querySelector("[data-save-detail]");
+  if (saveBtn) {
+    saveBtn.addEventListener("click", async () => {
+      await toggleSave(key);
+      openDetails(key);
+    });
+  }
+}
+
 function eventCard(e) {
   const key = eventKey(e);
   const saved = savedIds.has(key);
@@ -118,7 +161,7 @@ function eventCard(e) {
     </div>
     <div class="meta">${esc(e.venue || "")}${e.city ? ` · ${esc(e.city)}` : ""}${e.postcode ? ` · ${esc(e.postcode)}` : ""}<br>${esc(e.time || "")}${e.price ? ` · ${esc(e.price)}` : ""}</div>
     <div class="tags">${e.region ? `<span class="tag">${esc(regionName(e.region))}</span>` : ""}</div>
-    <div class="actions">
+    <div class="actions"><button class="secondary" data-details="${escAttr(key)}">View details</button>
       <button class="${saved ? "secondary saved" : "secondary"}" onclick="toggleSave('${escAttr(key)}')">${saved ? "♥ Saved" : "♡ Save event"}</button>
       ${url !== "#" ? `<a class="primary" href="${escAttr(url)}" target="_blank" rel="noopener">Details</a>` : ""}
     </div>

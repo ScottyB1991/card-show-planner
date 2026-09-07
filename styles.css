@@ -130,3 +130,41 @@
     text-align: center;
   }
 }
+
+.details-card{
+  position:relative;
+  max-width:620px;
+  width:min(92vw,620px);
+}
+.details-card .icon-btn{
+  position:absolute;
+  top:.75rem;
+  right:.75rem;
+}
+.details-body{
+  padding-top:.5rem;
+}
+.details-body h2{
+  margin:0 2.5rem .75rem 0;
+  line-height:1.2;
+}
+.details-meta{
+  display:grid;
+  gap:.45rem;
+  margin:1rem 0;
+}
+.details-description{
+  line-height:1.6;
+  margin:1rem 0;
+}
+.details-actions{
+  display:grid;
+  gap:.6rem;
+  margin-top:1.1rem;
+}
+.details-actions a,
+.details-actions button{
+  min-height:44px;
+  border-radius:12px;
+  font-weight:700;
+}
