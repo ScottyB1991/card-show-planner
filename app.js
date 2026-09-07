@@ -301,6 +301,85 @@ function render() {
 }
 
 
+
+function icsEscape(value) {
+  return String(value || "")
+    .replace(/\\/g, "\\\\")
+    .replace(/\r?\n/g, "\\n")
+    .replace(/,/g, "\\,")
+    .replace(/;/g, "\\;");
+}
+
+function compactIcsDate(dateString) {
+  return String(dateString || "").replace(/-/g, "");
+}
+
+function addDaysToDateString(dateString, days) {
+  const d = new Date(String(dateString) + "T00:00:00");
+  if (Number.isNaN(d.getTime())) return "";
+  d.setDate(d.getDate() + days);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function safeCalendarFilename(name) {
+  return String(name || "card-show")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "") || "card-show";
+}
+
+function downloadCalendar(key) {
+  const e = currentEvents.find(x => eventKey(x) === key);
+  if (!e || !e.date) {
+    alert("This show does not have a confirmed date yet.");
+    return;
+  }
+
+  const rawUrl = e.ticket_url || e.source_url || "";
+  const url = /card\s*compass/i.test(rawUrl) || /cardcompass/i.test(rawUrl) ? "" : rawUrl;
+  const startDate = compactIcsDate(e.date);
+  const finalDate = e.end_date && e.end_date >= e.date ? e.end_date : e.date;
+  const endDate = compactIcsDate(addDaysToDateString(finalDate, 1));
+  const location = [e.venue, e.city, e.postcode].filter(Boolean).join(", ");
+  const descriptionBits = [
+    e.description || "Card show saved from The Card Map.",
+    url ? `Show link: ${url}` : "",
+    "Added via The Card Map — Your CardShow Scout."
+  ].filter(Boolean);
+
+  const uid = `${String(e.id || key).replace(/[^a-zA-Z0-9._-]/g, "-")}@thecardmap`;
+  const stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z");
+  const ics = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//The Card Map//Card Show Planner//EN",
+    "CALSCALE:GREGORIAN",
+    "METHOD:PUBLISH",
+    "BEGIN:VEVENT",
+    `UID:${icsEscape(uid)}`,
+    `DTSTAMP:${stamp}`,
+    `DTSTART;VALUE=DATE:${startDate}`,
+    `DTEND;VALUE=DATE:${endDate}`,
+    `SUMMARY:${icsEscape(e.name || "Card show")}`,
+    `LOCATION:${icsEscape(location)}`,
+    `DESCRIPTION:${icsEscape(descriptionBits.join("\n\n"))}`,
+    url ? `URL:${url}` : "",
+    "STATUS:CONFIRMED",
+    "END:VEVENT",
+    "END:VCALENDAR"
+  ].filter(Boolean).join("\r\n");
+
+  const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
+  const blobUrl = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = blobUrl;
+  a.download = `${safeCalendarFilename(e.name)}.ics`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(blobUrl), 1500);
+}
+
 function openDetails(key) {
   const e = currentEvents.find(x => eventKey(x) === key);
   if (!e) return;
@@ -332,6 +411,7 @@ function openDetails(key) {
       <div class="details-actions">
         <button class="primary" data-save-detail="${escAttr(key)}">${saved ? "♥ Saved to My Card Map" : "♡ Save event"}</button>
         ${maps ? `<a class="secondary map-action" href="${escAttr(maps)}" target="_blank" rel="noopener">🗺️ Open in Maps</a>` : ""}
+        ${e.date ? `<button type="button" class="secondary" onclick="downloadCalendar('${escAttr(key)}')">📅 Add to calendar</button>` : ""}
         ${url ? `<a class="primary" href="${escAttr(url)}" target="_blank" rel="noopener">🔗 Show website / tickets</a>` : ""}
       </div>
     </div>
@@ -439,6 +519,7 @@ function renderAccount() {
         <div class="next-show-actions">
           <button type="button" class="secondary" onclick="openDetails('${escAttr(eventKey(next))}')">View details</button>
           ${maps ? `<a class="secondary" href="${escAttr(maps)}" target="_blank" rel="noopener">🗺️ Map</a>` : ""}
+          ${next.date ? `<button type="button" class="secondary" onclick="downloadCalendar('${escAttr(eventKey(next))}')">📅 Calendar</button>` : ""}
           ${url ? `<a class="primary" href="${escAttr(url)}" target="_blank" rel="noopener">Tickets ↗</a>` : ""}
         </div>`;
     }
@@ -460,6 +541,7 @@ function renderAccount() {
         <button type="button" class="secondary" onclick="openDetails('${escAttr(eventKey(e))}')">Details</button>
         <button type="button" class="secondary" onclick="removeSavedFromAccount('${escAttr(eventKey(e))}')">♥ Saved</button>
         ${maps ? `<a class="secondary" href="${escAttr(maps)}" target="_blank" rel="noopener">🗺️ Map</a>` : ""}
+        ${e.date ? `<button type="button" class="secondary" onclick="downloadCalendar('${escAttr(eventKey(e))}')">📅 Calendar</button>` : ""}
         ${url ? `<a class="primary" href="${escAttr(url)}" target="_blank" rel="noopener">Tickets</a>` : ""}
       </div>
     </article>`;
