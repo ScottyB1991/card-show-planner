@@ -209,3 +209,11 @@
   .next-show-actions{display:grid;grid-template-columns:1fr}
   .next-show-actions a,.next-show-actions button{width:100%;text-align:center}
 }
+
+
+/* Shows Near Me — local distance sorting */
+.distance-chip{font-weight:800;background:#eef7ff;border:1px solid #d5eaff}
+#clearLocationBtn[hidden]{display:none}
+.location-card .primary,.location-card .secondary{min-height:44px;border:0;border-radius:12px;padding:10px 12px;cursor:pointer;font-weight:750}
+.location-card .secondary{border:1px solid #dddde5}
+@media(max-width:640px){.place-row{grid-template-columns:1fr}.location-card button{width:100%}}

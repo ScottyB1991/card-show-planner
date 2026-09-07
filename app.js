@@ -10,6 +10,120 @@ let userLocation = null;
 let userPlace = localStorage.getItem("csp_user_place") || "";
 
 const $ = (id) => document.getElementById(id);
+// Approximate town-centre coordinates for current Card Map show locations.
+// Kept in-app so Shows Near Me does not depend on a live postcode/geocoding API.
+const PLACE_CENTRES = {
+  "farnborough": [51.2869, -0.7526],
+  "ipswich": [52.0567, 1.1482],
+  "bath": [51.3811, -2.3590],
+  "birmingham": [52.4862, -1.8904],
+  "solihull": [52.4128, -1.7782],
+  "leeds": [53.8008, -1.5491],
+  "esher": [51.3692, -0.3656],
+  "watford": [51.6565, -0.3903],
+  "hull": [53.7676, -0.3274],
+  "derby": [52.9225, -1.4746],
+  "stowmarket": [52.1880, 0.9977],
+  "sheffield": [53.3811, -1.4701],
+  "edinburgh": [55.9533, -3.1883],
+  "lingfield": [51.1748, -0.0167],
+  "stoke": [53.0027, -2.1794],
+  "stoke-on-trent": [53.0027, -2.1794],
+  "sunderland": [54.9069, -1.3838],
+  "sandy": [52.1293, -0.2890],
+  "liverpool": [53.4084, -2.9916],
+  "melling": [53.4940, -2.9300],
+  "belfast": [54.5973, -5.9301],
+  "cheltenham": [51.8994, -2.0783],
+  "lincoln": [53.2307, -0.5406],
+  "milton keynes": [52.0406, -0.7594],
+  "bognor regis": [50.7829, -0.6760],
+  "brighton": [50.8225, -0.1372],
+  "london": [51.5074, -0.1278],
+  "brentwood": [51.6205, 0.3053],
+  "cambridge": [52.2053, 0.1218],
+  "newark": [53.0765, -0.8096],
+  "southampton": [50.9097, -1.4044],
+  "halifax": [53.7250, -1.8630],
+  "chester": [53.1934, -2.8931],
+  "carlisle": [54.8925, -2.9329],
+  "manchester": [53.4808, -2.2426],
+  "doncaster": [53.5228, -1.1285],
+  "leicester": [52.6369, -1.1398],
+  "swindon": [51.5558, -1.7797],
+  "luton": [51.8787, -0.4200],
+  "colchester": [51.8892, 0.9042],
+  "newmarket": [52.2440, 0.4060],
+  "bristol": [51.4545, -2.5879],
+  "ashford": [51.1465, 0.8750],
+  "coventry": [52.4068, -1.5197],
+  "maidstone": [51.2704, 0.5227],
+  "twickenham": [51.4449, -0.3370]
+};
+
+const POSTCODE_AREA_CENTRES = {
+  "GU": PLACE_CENTRES["farnborough"], "IP": PLACE_CENTRES["ipswich"],
+  "BA": PLACE_CENTRES["bath"], "B": PLACE_CENTRES["birmingham"],
+  "LS": PLACE_CENTRES["leeds"], "KT": PLACE_CENTRES["esher"],
+  "WD": PLACE_CENTRES["watford"], "HU": PLACE_CENTRES["hull"],
+  "DE": PLACE_CENTRES["derby"], "S": PLACE_CENTRES["sheffield"],
+  "EH": PLACE_CENTRES["edinburgh"], "RH": PLACE_CENTRES["lingfield"],
+  "ST": PLACE_CENTRES["stoke-on-trent"], "SR": PLACE_CENTRES["sunderland"],
+  "SG": PLACE_CENTRES["sandy"], "L": PLACE_CENTRES["liverpool"],
+  "BT": PLACE_CENTRES["belfast"], "GL": PLACE_CENTRES["cheltenham"],
+  "LN": PLACE_CENTRES["lincoln"], "MK": PLACE_CENTRES["milton keynes"],
+  "PO": PLACE_CENTRES["bognor regis"], "BN": PLACE_CENTRES["brighton"],
+  "W": PLACE_CENTRES["london"], "WC": PLACE_CENTRES["london"],
+  "E": PLACE_CENTRES["london"], "CM": PLACE_CENTRES["brentwood"],
+  "CB": PLACE_CENTRES["cambridge"], "NG": PLACE_CENTRES["newark"],
+  "SO": PLACE_CENTRES["southampton"], "HX": PLACE_CENTRES["halifax"],
+  "CH": PLACE_CENTRES["chester"], "CA": PLACE_CENTRES["carlisle"],
+  "M": PLACE_CENTRES["manchester"], "DN": PLACE_CENTRES["doncaster"],
+  "LE": PLACE_CENTRES["leicester"], "SN": PLACE_CENTRES["swindon"],
+  "LU": PLACE_CENTRES["luton"], "CO": PLACE_CENTRES["colchester"],
+  "BS": PLACE_CENTRES["bristol"], "TN": PLACE_CENTRES["ashford"],
+  "CV": PLACE_CENTRES["coventry"], "ME": PLACE_CENTRES["maidstone"],
+  "TW": PLACE_CENTRES["twickenham"]
+};
+
+function normalizePlace(value) {
+  return String(value || "").trim().toLowerCase().replace(/\s+/g, " ");
+}
+
+function postcodeArea(value) {
+  const m = String(value || "").toUpperCase().match(/^([A-Z]{1,2})/);
+  return m ? m[1] : "";
+}
+
+function coordsForEvent(e) {
+  const city = normalizePlace(e.city || e.location || "");
+  if (PLACE_CENTRES[city]) return PLACE_CENTRES[city];
+  const area = postcodeArea(e.postcode || e.address || e.venue || "");
+  return POSTCODE_AREA_CENTRES[area] || null;
+}
+
+function haversineMiles(lat1, lon1, lat2, lon2) {
+  const toRad = (d) => d * Math.PI / 180;
+  const R = 3958.7613;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(a));
+}
+
+function eventDistanceMiles(e) {
+  if (!userLocation) return null;
+  const c = coordsForEvent(e);
+  if (!c) return null;
+  return haversineMiles(userLocation.latitude, userLocation.longitude, c[0], c[1]);
+}
+
+function formatDistance(miles) {
+  if (miles == null || !Number.isFinite(miles)) return "";
+  if (miles < 10) return `${miles.toFixed(1)} mi`;
+  return `${Math.round(miles)} mi`;
+}
+
 
 function config() {
   return {
@@ -92,7 +206,7 @@ function render() {
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-  const filtered = currentEvents.filter(e => {
+  let filtered = currentEvents.filter(e => {
     const hay = [e.name,e.city,e.venue,e.postcode,e.region].join(" ").toLowerCase();
     const eventDate = e.date ? new Date(e.date + "T00:00:00") : null;
     let dateMatches = true;
@@ -109,7 +223,17 @@ function render() {
     }
     return (!q || hay.includes(q)) && (!region || e.region === region) && dateMatches;
   });
-  $("countLabel").textContent = `${filtered.length} show${filtered.length === 1 ? "" : "s"}`;
+  if (userLocation) {
+    filtered = filtered.slice().sort((a, b) => {
+      const da = eventDistanceMiles(a);
+      const db = eventDistanceMiles(b);
+      if (da == null && db == null) return String(a.date || "").localeCompare(String(b.date || ""));
+      if (da == null) return 1;
+      if (db == null) return -1;
+      return da - db || String(a.date || "").localeCompare(String(b.date || ""));
+    });
+  }
+  $("countLabel").textContent = `${filtered.length} show${filtered.length === 1 ? "" : "s"}${userLocation ? " · nearest first" : ""}`;
   $("eventsList").innerHTML = filtered.length ? filtered.map(eventCard).join("") :
     `<div class="empty">No shows match those filters.</div>`;
 }
@@ -130,6 +254,7 @@ function openDetails(key) {
     weekday: "long", day: "numeric", month: "long", year: "numeric"
   }) : "Date TBC";
   const maps = mapUrl(e);
+  const distance = eventDistanceMiles(e);
 
   content.innerHTML = `
     <div class="details-body">
@@ -139,6 +264,7 @@ function openDetails(key) {
         ${e.city ? `<div>📍 ${esc(e.city)}</div>` : ""}
         ${e.venue ? `<div>🏢 ${esc(e.venue)}</div>` : ""}
         ${e.postcode ? `<div>📮 ${esc(e.postcode)}</div>` : ""}
+        ${distance != null ? `<div>📍 <strong>Approx. ${esc(formatDistance(distance))} away</strong></div>` : ""}
       </div>
       ${e.description ? `<div class="details-description">${esc(e.description)}</div>` : ""}
       <div class="details-actions">
@@ -165,6 +291,7 @@ function eventCard(e) {
   const saved = savedIds.has(key);
   const rawUrl = e.ticket_url || e.source_url || "";
   const url = /card\s*compass/i.test(rawUrl) || /cardcompass/i.test(rawUrl) ? "#" : (rawUrl || "#");
+  const distance = eventDistanceMiles(e);
   return `<article class="event">
     <div class="event-top">
       <div><h3>${esc(e.name || "Card show")}</h3>
@@ -172,7 +299,7 @@ function eventCard(e) {
       <span class="tag">${esc(e.pokemon_relevance || "Card show")}</span>
     </div>
     <div class="meta">${esc(e.venue || "")}${e.city ? ` · ${esc(e.city)}` : ""}${e.postcode ? ` · ${esc(e.postcode)}` : ""}<br>${esc(e.time || "")}${e.price ? ` · ${esc(e.price)}` : ""}</div>
-    <div class="tags">${e.region ? `<span class="tag">${esc(regionName(e.region))}</span>` : ""}</div>
+    <div class="tags">${distance != null ? `<span class="tag distance-chip">📍 ${esc(formatDistance(distance))} away</span>` : ""}${e.region ? `<span class="tag">${esc(regionName(e.region))}</span>` : ""}</div>
     <div class="actions"><button type="button" class="secondary" onclick="openDetails(\'${escAttr(key)}\')">View details</button>
       <button class="${saved ? "secondary saved" : "secondary"}" onclick="toggleSave('${escAttr(key)}')">${saved ? "♥ Saved" : "♡ Save event"}</button>
       ${url !== "#" ? `<a class="primary" href="${escAttr(url)}" target="_blank" rel="noopener">Website / tickets ↗</a>` : ""}
@@ -320,7 +447,9 @@ function useMyLocation() {
       };
       userPlace = "";
       localStorage.removeItem("csp_user_place");
-      setLocationStatus("📍 Location found. We'll use it for accurate show distances in the next step.");
+      setLocationStatus("📍 Location found — shows are now sorted nearest first. Distances are approximate straight-line miles.");
+      const clearBtn = $("clearLocationBtn"); if (clearBtn) clearBtn.hidden = false;
+      render();
     },
     (error) => {
       const messages = {
@@ -340,10 +469,29 @@ function useEnteredPlace() {
     setLocationStatus("Enter a town or postcode first.", true);
     return;
   }
+  const normalized = normalizePlace(value);
+  let coords = PLACE_CENTRES[normalized] || null;
+  if (!coords) coords = POSTCODE_AREA_CENTRES[postcodeArea(value)] || null;
+  if (!coords) {
+    setLocationStatus("I don't have that town/postcode area stored yet. Use phone location for accurate nearest-show sorting.", true);
+    return;
+  }
   userPlace = value;
-  userLocation = null;
+  userLocation = { latitude: coords[0], longitude: coords[1], accuracy: null, approximate: true };
   localStorage.setItem("csp_user_place", value);
-  setLocationStatus(`📍 Location set to ${value}. We'll use it for accurate show distances in the next step.`);
+  setLocationStatus(`📍 Using ${value} — shows are sorted nearest first. Town/postcode distances are approximate.`);
+  const clearBtn = $("clearLocationBtn"); if (clearBtn) clearBtn.hidden = false;
+  render();
+}
+
+function clearLocation() {
+  userLocation = null;
+  userPlace = "";
+  localStorage.removeItem("csp_user_place");
+  $("placeInput").value = "";
+  const clearBtn = $("clearLocationBtn"); if (clearBtn) clearBtn.hidden = true;
+  setLocationStatus("Distance sorting cleared.");
+  render();
 }
 
 async function signInOrSignUp(mode) {
@@ -386,12 +534,19 @@ function escAttr(v) { return esc(v).replace(/`/g, "&#96;"); }
 
 $("useLocationBtn").addEventListener("click", useMyLocation);
 $("placeBtn").addEventListener("click", useEnteredPlace);
+$("clearLocationBtn").addEventListener("click", clearLocation);
 $("placeInput").addEventListener("keydown", (ev) => {
   if (ev.key === "Enter") useEnteredPlace();
 });
 if (userPlace) {
   $("placeInput").value = userPlace;
-  setLocationStatus(`📍 Location set to ${userPlace}. We'll use it for accurate show distances in the next step.`);
+  const normalized = normalizePlace(userPlace);
+  const coords = PLACE_CENTRES[normalized] || POSTCODE_AREA_CENTRES[postcodeArea(userPlace)] || null;
+  if (coords) {
+    userLocation = { latitude: coords[0], longitude: coords[1], accuracy: null, approximate: true };
+    setLocationStatus(`📍 Using ${userPlace} — shows are sorted nearest first. Town/postcode distances are approximate.`);
+    const clearBtn = $("clearLocationBtn"); if (clearBtn) clearBtn.hidden = false;
+  }
 }
 
 async function init() {

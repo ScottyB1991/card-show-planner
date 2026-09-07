@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f7f7fb">
   <title>THE CARD MAP</title>
-  <link rel="stylesheet" href="styles.css?v=4">
+  <link rel="stylesheet" href="styles.css?v=5">
 </head>
 <body>
   <header class="topbar">
@@ -49,11 +49,12 @@
 
     <section class="location-card card">
       <div class="section-head">
-        <div><h2>📍 Shows Near Me</h2><span class="muted">Find shows by distance from you.</span></div>
+        <div><h2>📍 Shows Near Me</h2><span class="muted">Sort upcoming shows by approximate distance.</span></div>
       </div>
       <div class="location-actions">
-        <button id="useLocationBtn" type="button" class="primary">📍 Use my location</button>
-        <div class="location-or">or</div>
+        <button id="useLocationBtn" type="button" class="primary">📍 Use my location & sort nearest</button>
+        <button id="clearLocationBtn" type="button" class="secondary" hidden>Clear distance sorting</button>
+        <div class="location-or">or use a supported town / postcode area</div>
         <div class="place-row">
           <input id="placeInput" type="text" placeholder="Town or postcode" autocomplete="postal-code">
           <button id="placeBtn" type="button" class="secondary">Set location</button>
