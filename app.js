@@ -606,6 +606,9 @@ function renderAccount() {
     const rawUrl = e.ticket_url || e.source_url || "";
     const url = /card\s*compass/i.test(rawUrl) || /cardcompass/i.test(rawUrl) ? "" : rawUrl;
     const maps = mapUrl(e);
+    const currentStatus = savedStatuses.get(eventKey(e)) || "interested";
+    const eventDay = e.date ? new Date(e.date + "T00:00:00") : null;
+    const attendedLocked = Boolean(eventDay && eventDay > today && currentStatus !== "attended");
     return `<article class="saved-event${isPast ? " saved-past" : ""}">
       <div class="saved-title">${esc(e.name || "Card show")}</div>
       <div class="saved-meta">${formatDate(e.date)}${e.city ? ` · ${esc(e.city)}` : ""}${e.venue ? ` · ${esc(e.venue)}` : ""}</div>
@@ -614,8 +617,12 @@ function renderAccount() {
           ["interested", "❤️ Interested"],
           ["going", "🎟️ Going"],
           ["attended", "✅ Attended"]
-        ].map(([value, label]) => `<button type="button" class="status-choice${savedStatuses.get(eventKey(e)) === value ? " active" : ""}" onclick="setSavedStatus('${escAttr(eventKey(e))}','${value}')">${label}</button>`).join("")}
+        ].map(([value, label]) => {
+          const locked = value === "attended" && attendedLocked;
+          return `<button type="button" class="status-choice${currentStatus === value ? " active" : ""}${locked ? " locked" : ""}" onclick="setSavedStatus('${escAttr(eventKey(e))}','${value}')"${locked ? ' disabled aria-disabled="true" title="Attended unlocks on the show date"' : ""}>${label}</button>`;
+        }).join("")}
       </div>
+      ${attendedLocked ? `<div class="status-hint">✅ Attended unlocks on the show date.</div>` : ""}
       <div class="saved-actions">
         <button type="button" class="secondary" onclick="openDetails('${escAttr(eventKey(e))}')">Details</button>
         <button type="button" class="secondary" onclick="removeSavedFromAccount('${escAttr(eventKey(e))}')">♥ Saved</button>
@@ -634,7 +641,7 @@ function renderAccount() {
 
   list.innerHTML = [
     upcomingPlans.length ? `<div class="saved-group-label">UPCOMING PLANS · ${upcomingPlans.length}</div>${upcomingPlans.map(e => savedCard(e)).join("")}` : "",
-    attended.length ? `<section class="show-history"><div class="history-head"><div><span class="history-kicker">✅ SHOW HISTORY</span><strong>${attended.length} attended</strong></div><span class="history-trophy">🏆</span></div>${attended.map(e => savedCard(e, true)).join("")}</section>` : "",
+    attended.length ? `<section class="show-history"><div class="history-head"><div class="history-title-row"><span class="history-kicker">✅ SHOW HISTORY</span><strong>${attended.length} attended</strong></div><div class="history-subtitle">🏆 Your card-show history</div></div>${attended.map(e => savedCard(e, true)).join("")}</section>` : "",
     pastUnattended.length ? `<details class="past-shows"><summary>Past saved shows · ${pastUnattended.length}</summary>${pastUnattended.map(e => savedCard(e, true)).join("")}</details>` : ""
   ].join("");
 }
@@ -643,6 +650,12 @@ async function setSavedStatus(key, status) {
   if (!currentUser || !supabaseClient || !["interested", "going", "attended"].includes(status)) return;
   const e = currentEvents.find(x => eventKey(x) === key);
   if (!e) return;
+  if (status === "attended" && e.date) {
+    const eventDay = new Date(e.date + "T00:00:00");
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (eventDay > today && (savedStatuses.get(key) || "interested") !== "attended") return;
+  }
   const previous = savedStatuses.get(key) || "interested";
   savedStatuses.set(key, status);
   renderAccount();
