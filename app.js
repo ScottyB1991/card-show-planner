@@ -161,9 +161,9 @@ function eventCard(e) {
     </div>
     <div class="meta">${esc(e.venue || "")}${e.city ? ` · ${esc(e.city)}` : ""}${e.postcode ? ` · ${esc(e.postcode)}` : ""}<br>${esc(e.time || "")}${e.price ? ` · ${esc(e.price)}` : ""}</div>
     <div class="tags">${e.region ? `<span class="tag">${esc(regionName(e.region))}</span>` : ""}</div>
-    <div class="actions"><button class="secondary" data-details="${escAttr(key)}">View details</button>
+    <div class="actions"><button type="button" class="secondary" onclick="openDetails(\'${escAttr(key)}\')">View details</button>
       <button class="${saved ? "secondary saved" : "secondary"}" onclick="toggleSave('${escAttr(key)}')">${saved ? "♥ Saved" : "♡ Save event"}</button>
-      ${url !== "#" ? `<a class="primary" href="${escAttr(url)}" target="_blank" rel="noopener">Details</a>` : ""}
+      ${url !== "#" ? `<a class="primary" href="${escAttr(url)}" target="_blank" rel="noopener">Website / tickets ↗</a>` : ""}
     </div>
   </article>`;
 }
