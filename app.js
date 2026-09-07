@@ -8,6 +8,10 @@ let savedIds = new Set();
 let currentUser = null;
 let userLocation = null;
 let userPlace = localStorage.getItem("csp_user_place") || "";
+let currentView = "list";
+let showsMap = null;
+let showMarkersLayer = null;
+let lastFilteredEvents = [];
 
 const $ = (id) => document.getElementById(id);
 // Approximate town-centre coordinates for current Card Map show locations.
@@ -199,6 +203,62 @@ function mapUrl(e) {
   return query ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}` : "";
 }
 
+function setView(mode) {
+  currentView = mode === "map" ? "map" : "list";
+  const list = $("eventsList");
+  const mapWrap = $("mapView");
+  const listBtn = $("listViewBtn");
+  const mapBtn = $("mapViewBtn");
+  if (!list || !mapWrap) return;
+  list.hidden = currentView === "map";
+  mapWrap.hidden = currentView !== "map";
+  listBtn?.classList.toggle("active", currentView === "list");
+  mapBtn?.classList.toggle("active", currentView === "map");
+  listBtn?.setAttribute("aria-pressed", String(currentView === "list"));
+  mapBtn?.setAttribute("aria-pressed", String(currentView === "map"));
+  if (currentView === "map") {
+    renderMap(lastFilteredEvents);
+    setTimeout(() => showsMap?.invalidateSize(), 50);
+  }
+}
+
+function ensureMap() {
+  if (showsMap || !window.L || !$("showsMap")) return !!showsMap;
+  showsMap = L.map("showsMap", { scrollWheelZoom: false }).setView([54.3, -2.6], 5);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 18,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+  }).addTo(showsMap);
+  showMarkersLayer = L.layerGroup().addTo(showsMap);
+  return true;
+}
+
+function renderMap(events) {
+  if (!ensureMap()) return;
+  showMarkersLayer.clearLayers();
+  const bounds = [];
+  events.forEach(e => {
+    const c = coordsForEvent(e);
+    if (!c) return;
+    const key = eventKey(e);
+    const maps = mapUrl(e);
+    const distance = eventDistanceMiles(e);
+    const popup = `<div class="map-popup">
+      <strong>${esc(e.name || "Card show")}</strong>
+      <div class="map-popup-meta">📅 ${esc(formatDate(e.date))}${e.city ? `<br>📍 ${esc(e.city)}` : ""}${distance != null ? `<br>📏 ~${esc(formatDistance(distance))} straight-line` : ""}</div>
+      <div class="map-popup-actions">
+        <button type="button" class="popup-primary" onclick="openDetails('${escAttr(key)}')">View details</button>
+        ${maps ? `<a href="${escAttr(maps)}" target="_blank" rel="noopener">Directions ↗</a>` : ""}
+      </div>
+    </div>`;
+    L.marker(c).addTo(showMarkersLayer).bindPopup(popup);
+    bounds.push(c);
+  });
+  if (bounds.length === 1) showsMap.setView(bounds[0], 10);
+  else if (bounds.length > 1) showsMap.fitBounds(bounds, { padding: [24, 24], maxZoom: 10 });
+  else showsMap.setView([54.3, -2.6], 5);
+}
+
 function render() {
   const q = $("searchInput").value.trim().toLowerCase();
   const region = $("regionSelect").value;
@@ -233,9 +293,11 @@ function render() {
       return da - db || String(a.date || "").localeCompare(String(b.date || ""));
     });
   }
+  lastFilteredEvents = filtered;
   $("countLabel").textContent = `${filtered.length} show${filtered.length === 1 ? "" : "s"}${userLocation ? " · nearest first" : ""}`;
   $("eventsList").innerHTML = filtered.length ? filtered.map(eventCard).join("") :
     `<div class="empty">No shows match those filters.</div>`;
+  if (currentView === "map") renderMap(filtered);
 }
 
 
@@ -570,6 +632,8 @@ async function init() {
   }
 }
 
+$("listViewBtn").addEventListener("click", () => setView("list"));
+$("mapViewBtn").addEventListener("click", () => setView("map"));
 $("searchInput").addEventListener("input", render);
 $("regionSelect").addEventListener("change", render);
 $("dateSelect").addEventListener("change", render);

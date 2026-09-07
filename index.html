@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f7f7fb">
   <title>THE CARD MAP</title>
-  <link rel="stylesheet" href="styles.css?v=5">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+  <link rel="stylesheet" href="styles.css?v=6">
 </head>
 <body>
   <header class="topbar">
@@ -64,11 +65,21 @@
     </section>
 
     <section>
-      <div class="section-head">
+      <div class="section-head shows-head">
         <h2>Upcoming shows</h2>
-        <span id="countLabel"></span>
+        <div class="shows-head-actions">
+          <span id="countLabel"></span>
+          <div class="view-toggle" role="group" aria-label="Show view">
+            <button id="listViewBtn" type="button" class="view-btn active" aria-pressed="true">☰ List</button>
+            <button id="mapViewBtn" type="button" class="view-btn" aria-pressed="false">🗺️ Map</button>
+          </div>
+        </div>
       </div>
       <div id="eventsList" class="events"></div>
+      <div id="mapView" class="map-view" hidden>
+        <div id="showsMap" class="shows-map" aria-label="Map of card shows"></div>
+        <p class="map-note">Pins use The Card Map's stored show-area coordinates. Tap a pin for show details and directions.</p>
+      </div>
     </section>
   </main>
 
@@ -142,7 +153,8 @@
   </dialog>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="app.js?v=5"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <script src="app.js?v=6"></script>
 
 <dialog id="detailsDialog" class="modal">
   <div class="modal-card details-card">
