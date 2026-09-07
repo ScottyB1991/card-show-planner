@@ -168,3 +168,20 @@
   border-radius:12px;
   font-weight:700;
 }
+
+
+/* The Card Map — directions upgrade */
+.map-action{
+  display:grid;
+  place-items:center;
+  text-decoration:none;
+}
+.saved-actions a,
+.saved-actions button{
+  min-height:38px;
+  border-radius:10px;
+  padding:8px 10px;
+  text-decoration:none;
+  display:grid;
+  place-items:center;
+}

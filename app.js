@@ -77,6 +77,14 @@ function eventKey(e) {
   return String(e.id ?? e.name ?? "");
 }
 
+function mapUrl(e) {
+  const query = [e.venue || e.address || "", e.city || e.location || "", e.postcode || ""]
+    .filter(Boolean)
+    .join(", ")
+    .trim();
+  return query ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}` : "";
+}
+
 function render() {
   const q = $("searchInput").value.trim().toLowerCase();
   const region = $("regionSelect").value;
@@ -121,6 +129,7 @@ function openDetails(key) {
   const dateText = e.date ? new Date(e.date + "T00:00:00").toLocaleDateString(undefined, {
     weekday: "long", day: "numeric", month: "long", year: "numeric"
   }) : "Date TBC";
+  const maps = mapUrl(e);
 
   content.innerHTML = `
     <div class="details-body">
@@ -134,6 +143,7 @@ function openDetails(key) {
       ${e.description ? `<div class="details-description">${esc(e.description)}</div>` : ""}
       <div class="details-actions">
         <button class="primary" data-save-detail="${escAttr(key)}">${saved ? "♥ Saved to My Card Map" : "♡ Save event"}</button>
+        ${maps ? `<a class="secondary map-action" href="${escAttr(maps)}" target="_blank" rel="noopener">🗺️ Open in Maps</a>` : ""}
         ${url ? `<a class="primary" href="${escAttr(url)}" target="_blank" rel="noopener">🔗 Show website / tickets</a>` : ""}
       </div>
     </div>
@@ -216,12 +226,14 @@ function renderAccount() {
   }
   list.innerHTML = saved.map(e => {
     const url = e.ticket_url || e.source_url || "#";
+    const maps = mapUrl(e);
     return `<article class="saved-event">
       <div class="saved-title">${esc(e.name || "Card show")}</div>
       <div class="saved-meta">${formatDate(e.date)}${e.city ? ` · ${esc(e.city)}` : ""}${e.venue ? ` · ${esc(e.venue)}` : ""}</div>
       <div class="saved-actions">
         <button type="button" class="secondary" onclick="removeSavedFromAccount('${escAttr(eventKey(e))}')">♥ Saved</button>
-        ${url !== "#" ? `<a class="primary" href="${escAttr(url)}" target="_blank" rel="noopener">Details</a>` : ""}
+        ${maps ? `<a class="secondary" href="${escAttr(maps)}" target="_blank" rel="noopener">🗺️ Map</a>` : ""}
+        ${url !== "#" ? `<a class="primary" href="${escAttr(url)}" target="_blank" rel="noopener">Tickets</a>` : ""}
       </div>
     </article>`;
   }).join("");
