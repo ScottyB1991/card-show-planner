@@ -411,3 +411,55 @@ body{overflow-x:hidden}
   .next-show-actions{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
   .next-show-actions a,.next-show-actions button{min-height:40px;padding:8px 6px;font-size:11.5px}
 }
+
+
+/* The Card Map — planner summary + attended history */
+.planner-stats{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:7px;
+  margin:10px 0 12px;
+}
+.planner-stats[hidden]{display:none}
+.planner-stat{
+  min-width:0;
+  display:grid;
+  grid-template-columns:auto auto;
+  grid-template-rows:auto auto;
+  align-items:center;
+  justify-content:center;
+  column-gap:5px;
+  padding:9px 6px;
+  border:1px solid #44444c;
+  border-radius:13px;
+  background:#1b1b1f;
+  text-align:center;
+}
+.planner-stat span{grid-row:1;font-size:15px}
+.planner-stat strong{grid-row:1;font-size:16px;line-height:1}
+.planner-stat small{grid-column:1/-1;margin-top:3px;color:#aaaab4;font-size:10px;font-weight:750;line-height:1.1}
+.show-history{
+  display:grid;
+  gap:8px;
+  margin-top:14px;
+  padding-top:12px;
+  border-top:1px solid #45454d;
+}
+.history-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:0 2px 2px;
+}
+.history-head>div{display:grid;gap:2px}
+.history-kicker{font-size:10px;font-weight:900;letter-spacing:.09em;color:#bdbdc6}
+.history-head strong{font-size:14px}
+.history-trophy{font-size:21px}
+.show-history .saved-event{opacity:.92}
+.show-history .saved-past{opacity:.92}
+@media(max-width:420px){
+  .planner-stats{gap:5px}
+  .planner-stat{padding:8px 3px}
+  .planner-stat small{font-size:9.5px}
+}

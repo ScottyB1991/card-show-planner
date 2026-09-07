@@ -547,6 +547,7 @@ function renderAccount() {
   const list = $("savedEventsList");
   const count = $("savedCount");
   const nextCard = $("nextShowCard");
+  const plannerStats = $("plannerStats");
   if (!email || !list || !count) return;
   email.textContent = currentUser?.email || "Signed in";
 
@@ -559,6 +560,15 @@ function renderAccount() {
   today.setHours(0, 0, 0, 0);
   const upcoming = saved.filter(e => !e.date || new Date(e.date + "T00:00:00") >= today);
   const past = saved.filter(e => e.date && new Date(e.date + "T00:00:00") < today);
+
+  const statusCount = status => saved.filter(e => (savedStatuses.get(eventKey(e)) || "interested") === status).length;
+  if (plannerStats) {
+    plannerStats.innerHTML = `
+      <div class="planner-stat"><span>❤️</span><strong>${statusCount("interested")}</strong><small>Interested</small></div>
+      <div class="planner-stat"><span>🎟️</span><strong>${statusCount("going")}</strong><small>Going</small></div>
+      <div class="planner-stat"><span>✅</span><strong>${statusCount("attended")}</strong><small>Attended</small></div>`;
+    plannerStats.hidden = saved.length === 0;
+  }
 
   if (nextCard) {
     const next = upcoming.find(e => e.date && savedStatuses.get(eventKey(e)) === "going");
@@ -587,6 +597,7 @@ function renderAccount() {
   }
 
   if (!saved.length) {
+    if (plannerStats) plannerStats.hidden = true;
     list.innerHTML = `<div class="empty-saved">You haven't saved any shows yet.<br>Tap <strong>♡ Save event</strong> on a show to add it here.</div>`;
     return;
   }
@@ -615,9 +626,16 @@ function renderAccount() {
     </article>`;
   };
 
+  const attended = saved
+    .filter(e => (savedStatuses.get(eventKey(e)) || "interested") === "attended")
+    .sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")));
+  const upcomingPlans = upcoming.filter(e => (savedStatuses.get(eventKey(e)) || "interested") !== "attended");
+  const pastUnattended = past.filter(e => (savedStatuses.get(eventKey(e)) || "interested") !== "attended");
+
   list.innerHTML = [
-    upcoming.length ? `<div class="saved-group-label">UPCOMING · ${upcoming.length}</div>${upcoming.map(e => savedCard(e)).join("")}` : "",
-    past.length ? `<details class="past-shows"><summary>Past saved shows · ${past.length}</summary>${past.map(e => savedCard(e, true)).join("")}</details>` : ""
+    upcomingPlans.length ? `<div class="saved-group-label">UPCOMING PLANS · ${upcomingPlans.length}</div>${upcomingPlans.map(e => savedCard(e)).join("")}` : "",
+    attended.length ? `<section class="show-history"><div class="history-head"><div><span class="history-kicker">✅ SHOW HISTORY</span><strong>${attended.length} attended</strong></div><span class="history-trophy">🏆</span></div>${attended.map(e => savedCard(e, true)).join("")}</section>` : "",
+    pastUnattended.length ? `<details class="past-shows"><summary>Past saved shows · ${pastUnattended.length}</summary>${pastUnattended.map(e => savedCard(e, true)).join("")}</details>` : ""
   ].join("");
 }
 
