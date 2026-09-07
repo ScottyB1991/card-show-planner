@@ -299,7 +299,7 @@ function eventCard(e) {
       <span class="tag">${esc(e.pokemon_relevance || "Card show")}</span>
     </div>
     <div class="meta">${esc(e.venue || "")}${e.city ? ` · ${esc(e.city)}` : ""}${e.postcode ? ` · ${esc(e.postcode)}` : ""}<br>${esc(e.time || "")}${e.price ? ` · ${esc(e.price)}` : ""}</div>
-    <div class="tags">${distance != null ? `<span class="tag distance-chip">📍 ${esc(formatDistance(distance))} away</span>` : ""}${e.region ? `<span class="tag">${esc(regionName(e.region))}</span>` : ""}</div>
+    <div class="tags">${distance != null ? `<span class="tag distance-chip">📏 ~${esc(formatDistance(distance))} straight-line</span>` : ""}${e.region ? `<span class="tag">${esc(regionName(e.region))}</span>` : ""}</div>
     <div class="actions"><button type="button" class="secondary" onclick="openDetails(\'${escAttr(key)}\')">View details</button>
       <button class="${saved ? "secondary saved" : "secondary"}" onclick="toggleSave('${escAttr(key)}')">${saved ? "♥ Saved" : "♡ Save event"}</button>
       ${url !== "#" ? `<a class="primary" href="${escAttr(url)}" target="_blank" rel="noopener">Website / tickets ↗</a>` : ""}
@@ -447,7 +447,7 @@ function useMyLocation() {
       };
       userPlace = "";
       localStorage.removeItem("csp_user_place");
-      setLocationStatus("📍 Location found — shows are now sorted nearest first. Distances are approximate straight-line miles.");
+      setLocationStatus("📍 Location found — shows are sorted nearest first. Mileage shown is approximate straight-line distance; Maps gives the real driving route.");
       const clearBtn = $("clearLocationBtn"); if (clearBtn) clearBtn.hidden = false;
       render();
     },
@@ -479,7 +479,7 @@ function useEnteredPlace() {
   userPlace = value;
   userLocation = { latitude: coords[0], longitude: coords[1], accuracy: null, approximate: true };
   localStorage.setItem("csp_user_place", value);
-  setLocationStatus(`📍 Using ${value} — shows are sorted nearest first. Town/postcode distances are approximate.`);
+  setLocationStatus(`📍 Using ${value} — shows are sorted nearest first. Town/postcode distances are approximate straight-line distances; Maps gives the real driving route.`);
   const clearBtn = $("clearLocationBtn"); if (clearBtn) clearBtn.hidden = false;
   render();
 }
@@ -544,7 +544,7 @@ if (userPlace) {
   const coords = PLACE_CENTRES[normalized] || POSTCODE_AREA_CENTRES[postcodeArea(userPlace)] || null;
   if (coords) {
     userLocation = { latitude: coords[0], longitude: coords[1], accuracy: null, approximate: true };
-    setLocationStatus(`📍 Using ${userPlace} — shows are sorted nearest first. Town/postcode distances are approximate.`);
+    setLocationStatus(`📍 Using ${userPlace} — shows are sorted nearest first. Town/postcode distances are approximate straight-line distances; Maps gives the real driving route.`);
     const clearBtn = $("clearLocationBtn"); if (clearBtn) clearBtn.hidden = false;
   }
 }
