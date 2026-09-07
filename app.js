@@ -439,6 +439,38 @@ function downloadCalendar(key) {
   setTimeout(() => URL.revokeObjectURL(blobUrl), 1500);
 }
 
+async function shareShow(key) {
+  const e = currentEvents.find(x => eventKey(x) === key);
+  if (!e) return;
+
+  const rawUrl = e.ticket_url || e.source_url || "";
+  const url = /card\s*compass/i.test(rawUrl) || /cardcompass/i.test(rawUrl) ? "" : rawUrl;
+  const location = [e.venue, e.city, e.postcode].filter(Boolean).join(", ");
+  const date = e.date ? formatDate(e.date) : "Date TBC";
+  const text = [
+    `🎴 ${e.name || "Card show"}`,
+    `📅 ${date}`,
+    location ? `📍 ${location}` : "",
+    url ? `🔗 ${url}` : "",
+    "Found on The Card Map — Your CardShow Scout"
+  ].filter(Boolean).join("\n");
+
+  try {
+    if (navigator.share) {
+      await navigator.share({ title: e.name || "Card show", text });
+      return;
+    }
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+      alert("Show details copied — ready to paste into WhatsApp, Messenger or anywhere else.");
+      return;
+    }
+    window.prompt("Copy these show details:", text);
+  } catch (err) {
+    if (err?.name !== "AbortError") console.warn("Could not share show:", err);
+  }
+}
+
 function openDetails(key) {
   const e = currentEvents.find(x => eventKey(x) === key);
   if (!e) return;
@@ -471,6 +503,7 @@ function openDetails(key) {
         <button class="primary" data-save-detail="${escAttr(key)}">${saved ? "♥ Saved to My Card Map" : "♡ Save event"}</button>
         ${maps ? `<a class="secondary map-action" href="${escAttr(maps)}" target="_blank" rel="noopener">🗺️ Open in Maps</a>` : ""}
         ${e.date ? `<button type="button" class="secondary" onclick="downloadCalendar('${escAttr(key)}')">📅 Add to calendar</button>` : ""}
+        <button type="button" class="secondary" onclick="shareShow('${escAttr(key)}')">📤 Share show</button>
         ${url ? `<a class="primary" href="${escAttr(url)}" target="_blank" rel="noopener">🔗 Show website / tickets</a>` : ""}
       </div>
     </div>
@@ -591,6 +624,7 @@ function renderAccount() {
           <button type="button" class="secondary" onclick="openDetails('${escAttr(eventKey(next))}')">View details</button>
           ${maps ? `<a class="secondary" href="${escAttr(maps)}" target="_blank" rel="noopener">🗺️ Map</a>` : ""}
           ${next.date ? `<button type="button" class="secondary" onclick="downloadCalendar('${escAttr(eventKey(next))}')">📅 Calendar</button>` : ""}
+          <button type="button" class="secondary" onclick="shareShow('${escAttr(eventKey(next))}')">📤 Share</button>
           ${url ? `<a class="primary" href="${escAttr(url)}" target="_blank" rel="noopener">Tickets ↗</a>` : ""}
         </div>`;
     }
@@ -642,6 +676,7 @@ function renderAccount() {
         <button type="button" class="secondary" onclick="removeSavedFromAccount('${escAttr(eventKey(e))}')">♥ Saved</button>
         ${maps ? `<a class="secondary" href="${escAttr(maps)}" target="_blank" rel="noopener">🗺️ Map</a>` : ""}
         ${e.date ? `<button type="button" class="secondary" onclick="downloadCalendar('${escAttr(eventKey(e))}')">📅 Calendar</button>` : ""}
+        <button type="button" class="secondary" onclick="shareShow('${escAttr(eventKey(e))}')">📤 Share</button>
         ${url ? `<a class="primary" href="${escAttr(url)}" target="_blank" rel="noopener">Tickets</a>` : ""}
       </div>
     </article>`;
