@@ -602,13 +602,27 @@ function renderAccount() {
     return;
   }
 
+  // Never present a future show as attended. This also cleans up any
+  // impossible state left behind by earlier testing.
+  const futureAttended = saved.filter(e => {
+    if (!e.date || (savedStatuses.get(eventKey(e)) || "interested") !== "attended") return false;
+    return new Date(e.date + "T00:00:00") > today;
+  });
+  futureAttended.forEach(e => savedStatuses.set(eventKey(e), "interested"));
+  if (futureAttended.length && currentUser && supabaseClient) {
+    Promise.all(futureAttended.map(e => supabaseClient.from("saved_events")
+      .update({ status: "interested" })
+      .eq("event_id", e.id)
+      .eq("user_id", currentUser.id))).catch(() => {});
+  }
+
   const savedCard = (e, isPast = false) => {
     const rawUrl = e.ticket_url || e.source_url || "";
     const url = /card\s*compass/i.test(rawUrl) || /cardcompass/i.test(rawUrl) ? "" : rawUrl;
     const maps = mapUrl(e);
     const currentStatus = savedStatuses.get(eventKey(e)) || "interested";
     const eventDay = e.date ? new Date(e.date + "T00:00:00") : null;
-    const attendedLocked = Boolean(eventDay && eventDay > today && currentStatus !== "attended");
+    const attendedLocked = Boolean(eventDay && eventDay > today);
     return `<article class="saved-event${isPast ? " saved-past" : ""}">
       <div class="saved-title">${esc(e.name || "Card show")}</div>
       <div class="saved-meta">${formatDate(e.date)}${e.city ? ` · ${esc(e.city)}` : ""}${e.venue ? ` · ${esc(e.venue)}` : ""}</div>
@@ -654,7 +668,7 @@ async function setSavedStatus(key, status) {
     const eventDay = new Date(e.date + "T00:00:00");
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    if (eventDay > today && (savedStatuses.get(key) || "interested") !== "attended") return;
+    if (eventDay > today) return;
   }
   const previous = savedStatuses.get(key) || "interested";
   savedStatuses.set(key, status);
