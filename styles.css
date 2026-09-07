@@ -336,3 +336,11 @@ body{overflow-x:hidden}
   .cluster-show-list { max-height: 220px; }
   .cluster-popup-shell .leaflet-popup-content { width: min(270px, 72vw) !important; }
 }
+
+
+/* Personal show status tracker */
+.show-status-picker{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:9px 0 10px}
+.status-choice{min-height:38px;padding:7px 6px;border:1px solid #4d4d57;border-radius:10px;background:#202024;color:#d9d9df;font:inherit;font-size:11px;font-weight:800;cursor:pointer}
+.status-choice.active{background:#5c5c64;color:#fff;border-color:#8b8b96;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+.next-show-empty{font-size:13px;line-height:1.45;color:#bdbdc6}
+@media(max-width:560px){.show-status-picker{grid-template-columns:1fr;gap:5px}.status-choice{min-height:40px;font-size:12px}}

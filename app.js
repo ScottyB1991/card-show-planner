@@ -5,6 +5,7 @@ let demoEvents = [];
 let currentEvents = [];
 let supabaseClient = null;
 let savedIds = new Set();
+let savedStatuses = new Map();
 let currentUser = null;
 let userLocation = null;
 let userPlace = localStorage.getItem("csp_user_place") || "";
@@ -143,14 +144,16 @@ async function loadDemoEvents() {
 
 async function loadSavedEvents() {
   savedIds = new Set();
+  savedStatuses = new Map();
   currentUser = null;
   if (!supabaseClient) return;
   const { data: { user } } = await supabaseClient.auth.getUser();
   currentUser = user || null;
   if (!currentUser) return;
-  const { data, error } = await supabaseClient.from("saved_events").select("event_id").eq("user_id", currentUser.id);
+  const { data, error } = await supabaseClient.from("saved_events").select("event_id,status").eq("user_id", currentUser.id);
   if (error) { console.warn("Could not load saved events:", error); return; }
   savedIds = new Set((data || []).map(row => String(row.event_id)));
+  savedStatuses = new Map((data || []).map(row => [String(row.event_id), row.status || "interested"]));
 }
 
 async function connectSupabase() {
@@ -522,10 +525,12 @@ async function toggleSave(key) {
     const { error } = await supabaseClient.from("saved_events").delete().eq("event_id", e.id).eq("user_id", authData.user.id);
     if (error) return alert(error.message);
     savedIds.delete(key);
+    savedStatuses.delete(key);
   } else {
-    const { error } = await supabaseClient.from("saved_events").insert({ event_id: e.id, user_id: authData.user.id });
+    const { error } = await supabaseClient.from("saved_events").insert({ event_id: e.id, user_id: authData.user.id, status: "interested" });
     if (error) return alert(error.message);
     savedIds.add(key);
+    savedStatuses.set(key, "interested");
   }
   render();
   renderAccount();
@@ -556,10 +561,10 @@ function renderAccount() {
   const past = saved.filter(e => e.date && new Date(e.date + "T00:00:00") < today);
 
   if (nextCard) {
-    const next = upcoming.find(e => e.date);
+    const next = upcoming.find(e => e.date && savedStatuses.get(eventKey(e)) === "going");
     if (!next) {
-      nextCard.hidden = true;
-      nextCard.innerHTML = "";
+      nextCard.hidden = false;
+      nextCard.innerHTML = `<div class="next-show-kicker">🎯 YOUR NEXT SHOW</div><div class="next-show-empty">Mark an upcoming saved show as <strong>🎟️ Going</strong> and it will appear here.</div>`;
     } else {
       const eventDate = new Date(next.date + "T00:00:00");
       const days = Math.max(0, Math.round((eventDate - today) / 86400000));
@@ -593,6 +598,13 @@ function renderAccount() {
     return `<article class="saved-event${isPast ? " saved-past" : ""}">
       <div class="saved-title">${esc(e.name || "Card show")}</div>
       <div class="saved-meta">${formatDate(e.date)}${e.city ? ` · ${esc(e.city)}` : ""}${e.venue ? ` · ${esc(e.venue)}` : ""}</div>
+      <div class="show-status-picker" role="group" aria-label="Show status">
+        ${[
+          ["interested", "❤️ Interested"],
+          ["going", "🎟️ Going"],
+          ["attended", "✅ Attended"]
+        ].map(([value, label]) => `<button type="button" class="status-choice${savedStatuses.get(eventKey(e)) === value ? " active" : ""}" onclick="setSavedStatus('${escAttr(eventKey(e))}','${value}')">${label}</button>`).join("")}
+      </div>
       <div class="saved-actions">
         <button type="button" class="secondary" onclick="openDetails('${escAttr(eventKey(e))}')">Details</button>
         <button type="button" class="secondary" onclick="removeSavedFromAccount('${escAttr(eventKey(e))}')">♥ Saved</button>
@@ -609,6 +621,24 @@ function renderAccount() {
   ].join("");
 }
 
+async function setSavedStatus(key, status) {
+  if (!currentUser || !supabaseClient || !["interested", "going", "attended"].includes(status)) return;
+  const e = currentEvents.find(x => eventKey(x) === key);
+  if (!e) return;
+  const previous = savedStatuses.get(key) || "interested";
+  savedStatuses.set(key, status);
+  renderAccount();
+  const { error } = await supabaseClient.from("saved_events")
+    .update({ status })
+    .eq("event_id", e.id)
+    .eq("user_id", currentUser.id);
+  if (error) {
+    savedStatuses.set(key, previous);
+    renderAccount();
+    alert(error.message);
+  }
+}
+
 async function removeSavedFromAccount(key) {
   if (!currentUser || !supabaseClient) return;
   const e = currentEvents.find(x => eventKey(x) === key);
@@ -616,6 +646,7 @@ async function removeSavedFromAccount(key) {
   const { error } = await supabaseClient.from("saved_events").delete().eq("event_id", e.id).eq("user_id", currentUser.id);
   if (error) return alert(error.message);
   savedIds.delete(key);
+  savedStatuses.delete(key);
   render();
   renderAccount();
 }
@@ -725,7 +756,7 @@ async function signOut() {
   if (!supabaseClient) return;
   const { error } = await supabaseClient.auth.signOut();
   if (error) return showAuthMessage(error.message);
-  savedIds = new Set(); currentUser = null; updateAuthUI(); render(); renderAccount(); showAuthMessage("Signed out.");
+  savedIds = new Set(); savedStatuses = new Map(); currentUser = null; updateAuthUI(); render(); renderAccount(); showAuthMessage("Signed out.");
 }
 
 function esc(v) { return String(v ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
