@@ -235,7 +235,7 @@ function ensureMap() {
   showMarkersLayer = typeof L.markerClusterGroup === "function"
     ? L.markerClusterGroup({
         showCoverageOnHover: false,
-        zoomToBoundsOnClick: true,
+        zoomToBoundsOnClick: false,
         spiderfyOnMaxZoom: true,
         removeOutsideVisibleBounds: true,
         maxClusterRadius: 52,
@@ -243,6 +243,47 @@ function ensureMap() {
       })
     : L.layerGroup();
   showMarkersLayer.addTo(showsMap);
+
+  // On clustered maps, tapping a numbered cluster opens a compact list of
+  // the shows inside it. Users can jump straight to show details or zoom
+  // into the cluster for the individual pins.
+  if (typeof showMarkersLayer.on === "function" && typeof showMarkersLayer.zoomToShowLayer === "function") {
+    showMarkersLayer.on("clusterclick", ev => {
+      const markers = ev.layer.getAllChildMarkers();
+      const items = markers
+        .map(marker => marker.cardEvent)
+        .filter(Boolean)
+        .sort((a, b) => String(a.date || "").localeCompare(String(b.date || "")));
+      const visible = items.slice(0, 10);
+      const rows = visible.map(e => {
+        const key = eventKey(e);
+        const distance = eventDistanceMiles(e);
+        return `<button type="button" class="cluster-show-row" onclick="showsMap.closePopup(); openDetails('${escAttr(key)}')">
+          <span class="cluster-show-name">${esc(e.name || "Card show")}</span>
+          <span class="cluster-show-meta">${esc(formatDate(e.date))}${e.city ? ` · ${esc(e.city)}` : ""}${distance != null ? ` · ~${esc(formatDistance(distance))}` : ""}</span>
+        </button>`;
+      }).join("");
+      const more = items.length > visible.length
+        ? `<div class="cluster-more">+${items.length - visible.length} more — zoom in to split the cluster</div>`
+        : "";
+      const popup = `<div class="cluster-list-popup">
+        <div class="cluster-list-head"><strong>${items.length} shows in this area</strong><span>Tap a show for details</span></div>
+        <div class="cluster-show-list">${rows}</div>
+        ${more}
+        <button type="button" class="cluster-zoom-btn" id="clusterZoomBtn">🔎 Zoom into area</button>
+      </div>`;
+      L.popup({ maxWidth: 340, minWidth: 250, className: "cluster-popup-shell" })
+        .setLatLng(ev.layer.getLatLng())
+        .setContent(popup)
+        .openOn(showsMap);
+      setTimeout(() => {
+        document.getElementById("clusterZoomBtn")?.addEventListener("click", () => {
+          showsMap.closePopup();
+          showsMap.fitBounds(ev.layer.getBounds(), { padding: [36, 36], maxZoom: 11 });
+        }, { once: true });
+      }, 0);
+    });
+  }
   return true;
 }
 
@@ -264,7 +305,9 @@ function renderMap(events) {
         ${maps ? `<a href="${escAttr(maps)}" target="_blank" rel="noopener">Directions ↗</a>` : ""}
       </div>
     </div>`;
-    L.marker(c).addTo(showMarkersLayer).bindPopup(popup);
+    const marker = L.marker(c).bindPopup(popup);
+    marker.cardEvent = e;
+    marker.addTo(showMarkersLayer);
     bounds.push(c);
   });
   if (bounds.length === 1) showsMap.setView(bounds[0], 10);
