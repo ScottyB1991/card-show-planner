@@ -116,7 +116,8 @@ function openDetails(key) {
   if (!dialog || !content) return;
 
   const saved = savedIds.has(key);
-  const url = e.ticket_url || e.source_url || "";
+  const rawUrl = e.ticket_url || e.source_url || "";
+  const url = /card\s*compass/i.test(rawUrl) || /cardcompass/i.test(rawUrl) ? "" : rawUrl;
   const dateText = e.date ? new Date(e.date + "T00:00:00").toLocaleDateString(undefined, {
     weekday: "long", day: "numeric", month: "long", year: "numeric"
   }) : "Date TBC";
@@ -152,7 +153,8 @@ function openDetails(key) {
 function eventCard(e) {
   const key = eventKey(e);
   const saved = savedIds.has(key);
-  const url = e.ticket_url || e.source_url || "#";
+  const rawUrl = e.ticket_url || e.source_url || "";
+  const url = /card\s*compass/i.test(rawUrl) || /cardcompass/i.test(rawUrl) ? "#" : (rawUrl || "#");
   return `<article class="event">
     <div class="event-top">
       <div><h3>${esc(e.name || "Card show")}</h3>
@@ -404,3 +406,17 @@ $("clearConfig").addEventListener("click", () => {
 });
 
 init();
+
+
+document.addEventListener("click", (ev) => {
+  const closeBtn = ev.target.closest("[data-close-details], .details-close, #detailsClose, #closeDetails");
+  if (!closeBtn) return;
+  ev.preventDefault();
+  const dialog = document.getElementById("detailsDialog");
+  if (dialog && dialog.open) dialog.close();
+});
+
+document.addEventListener("click", (ev) => {
+  const dialog = document.getElementById("detailsDialog");
+  if (dialog && ev.target === dialog) dialog.close();
+});
