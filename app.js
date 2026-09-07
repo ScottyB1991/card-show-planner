@@ -14,6 +14,8 @@ let currentView = "list";
 let showsMap = null;
 let showMarkersLayer = null;
 let lastFilteredEvents = [];
+let journeyMap = null;
+let journeyMarkersLayer = null;
 
 const $ = (id) => document.getElementById(id);
 // Approximate town-centre coordinates for current Card Map show locations.
@@ -580,6 +582,57 @@ function updateAuthUI() {
   btn.textContent = currentUser ? "👤 Account" : "👤 Sign in";
 }
 
+function renderCollectorJourney(saved, today) {
+  const wrap = $("collectorJourney");
+  const stats = $("journeyStats");
+  const mapEl = $("journeyMap");
+  const empty = $("journeyEmpty");
+  const countEl = $("journeyMapCount");
+  if (!wrap || !stats || !mapEl || !empty) return;
+
+  const attended = saved.filter(e => {
+    const status = savedStatuses.get(eventKey(e)) || "interested";
+    if (status !== "attended" || !e.date) return false;
+    return new Date(e.date + "T00:00:00") <= today;
+  });
+  const cities = new Set(attended.map(e => normalizePlace(e.city || e.location || "")).filter(Boolean));
+  const year = today.getFullYear();
+  const thisYear = attended.filter(e => String(e.date || "").startsWith(String(year))).length;
+
+  stats.innerHTML = `
+    <div class="journey-stat"><span>🏆</span><strong>${attended.length}</strong><small>Shows Attended</small></div>
+    <div class="journey-stat"><span>📍</span><strong>${cities.size}</strong><small>Cities Visited</small></div>
+    <div class="journey-stat"><span>📅</span><strong>${thisYear}</strong><small>Attended in ${year}</small></div>`;
+  if (countEl) countEl.textContent = `${attended.length} pin${attended.length === 1 ? "" : "s"}`;
+
+  const mapped = attended.map(e => ({ e, c: coordsForEvent(e) })).filter(x => x.c);
+  empty.hidden = mapped.length > 0;
+  mapEl.hidden = mapped.length === 0;
+  if (!mapped.length || !window.L) return;
+
+  setTimeout(() => {
+    if (!journeyMap) {
+      journeyMap = L.map("journeyMap", { scrollWheelZoom: false, zoomControl: true }).setView([54.3, -2.6], 5);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 18,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      }).addTo(journeyMap);
+      journeyMarkersLayer = L.layerGroup().addTo(journeyMap);
+    }
+    journeyMarkersLayer.clearLayers();
+    const bounds = [];
+    mapped.forEach(({ e, c }) => {
+      const key = eventKey(e);
+      const popup = `<div class="map-popup"><strong>${esc(e.name || "Card show")}</strong><div class="map-popup-meta">📅 ${esc(formatDate(e.date))}${e.city ? `<br>📍 ${esc(e.city)}` : ""}</div><div class="map-popup-actions"><button type="button" class="popup-primary" onclick="openDetails('${escAttr(key)}')">View details</button></div></div>`;
+      L.marker(c).bindPopup(popup).addTo(journeyMarkersLayer);
+      bounds.push(c);
+    });
+    if (bounds.length === 1) journeyMap.setView(bounds[0], 9);
+    else journeyMap.fitBounds(bounds, { padding: [22, 22], maxZoom: 8 });
+    journeyMap.invalidateSize();
+  }, 80);
+}
+
 function renderAccount() {
   const email = $("accountEmail");
   const list = $("savedEventsList");
@@ -636,6 +689,7 @@ function renderAccount() {
   }
 
   if (!saved.length) {
+    renderCollectorJourney(saved, today);
     if (plannerStats) plannerStats.hidden = true;
     list.innerHTML = `<div class="empty-saved">You haven't saved any shows yet.<br>Tap <strong>♡ Save event</strong> on a show to add it here.</div>`;
     return;
@@ -654,6 +708,8 @@ function renderAccount() {
       .eq("event_id", e.id)
       .eq("user_id", currentUser.id))).catch(() => {});
   }
+
+  renderCollectorJourney(saved, today);
 
   const savedCard = (e, isPast = false) => {
     const rawUrl = e.ticket_url || e.source_url || "";
