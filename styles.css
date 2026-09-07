@@ -185,3 +185,27 @@
   display:grid;
   place-items:center;
 }
+
+
+/* The Card Map — My Card Map planner upgrade */
+.next-show-card{
+  margin:14px 0 18px;
+  padding:16px;
+  border:2px solid #17171b;
+  border-radius:16px;
+  background:#fff;
+}
+.next-show-card[hidden]{display:none}
+.next-show-kicker{font-size:11px;font-weight:900;letter-spacing:.08em;margin-bottom:7px}
+.next-show-title{font-size:20px;font-weight:900;line-height:1.15;margin-bottom:7px}
+.next-show-meta{font-size:13px;color:#5f5f68;margin-bottom:12px}
+.next-show-actions{display:flex;gap:7px;flex-wrap:wrap}
+.next-show-actions a,.next-show-actions button{font-size:12px;text-decoration:none;min-height:38px;display:grid;place-items:center}
+.saved-group-label{font-size:11px;font-weight:900;letter-spacing:.08em;color:#666;margin:12px 2px 7px}
+.past-shows{margin-top:14px}
+.past-shows summary{cursor:pointer;font-weight:800;font-size:13px;padding:10px 2px}
+.saved-past{opacity:.7}
+@media (max-width:640px){
+  .next-show-actions{display:grid;grid-template-columns:1fr}
+  .next-show-actions a,.next-show-actions button{width:100%;text-align:center}
+}

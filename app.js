@@ -216,27 +216,70 @@ function renderAccount() {
   const email = $("accountEmail");
   const list = $("savedEventsList");
   const count = $("savedCount");
+  const nextCard = $("nextShowCard");
   if (!email || !list || !count) return;
   email.textContent = currentUser?.email || "Signed in";
-  const saved = currentEvents.filter(e => savedIds.has(eventKey(e)));
+
+  const saved = currentEvents
+    .filter(e => savedIds.has(eventKey(e)))
+    .sort((a, b) => String(a.date || "9999-12-31").localeCompare(String(b.date || "9999-12-31")));
+
   count.textContent = `${saved.length} show${saved.length === 1 ? "" : "s"}`;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const upcoming = saved.filter(e => !e.date || new Date(e.date + "T00:00:00") >= today);
+  const past = saved.filter(e => e.date && new Date(e.date + "T00:00:00") < today);
+
+  if (nextCard) {
+    const next = upcoming.find(e => e.date);
+    if (!next) {
+      nextCard.hidden = true;
+      nextCard.innerHTML = "";
+    } else {
+      const eventDate = new Date(next.date + "T00:00:00");
+      const days = Math.max(0, Math.round((eventDate - today) / 86400000));
+      const when = days === 0 ? "Today!" : days === 1 ? "Tomorrow" : `${days} days to go`;
+      const maps = mapUrl(next);
+      const rawUrl = next.ticket_url || next.source_url || "";
+      const url = /card\s*compass/i.test(rawUrl) || /cardcompass/i.test(rawUrl) ? "" : rawUrl;
+      nextCard.hidden = false;
+      nextCard.innerHTML = `
+        <div class="next-show-kicker">🎯 YOUR NEXT SHOW · ${esc(when)}</div>
+        <div class="next-show-title">${esc(next.name || "Card show")}</div>
+        <div class="next-show-meta">📅 ${formatDate(next.date)}${next.city ? ` · 📍 ${esc(next.city)}` : ""}</div>
+        <div class="next-show-actions">
+          <button type="button" class="secondary" onclick="openDetails('${escAttr(eventKey(next))}')">View details</button>
+          ${maps ? `<a class="secondary" href="${escAttr(maps)}" target="_blank" rel="noopener">🗺️ Map</a>` : ""}
+          ${url ? `<a class="primary" href="${escAttr(url)}" target="_blank" rel="noopener">Tickets ↗</a>` : ""}
+        </div>`;
+    }
+  }
+
   if (!saved.length) {
     list.innerHTML = `<div class="empty-saved">You haven't saved any shows yet.<br>Tap <strong>♡ Save event</strong> on a show to add it here.</div>`;
     return;
   }
-  list.innerHTML = saved.map(e => {
-    const url = e.ticket_url || e.source_url || "#";
+
+  const savedCard = (e, isPast = false) => {
+    const rawUrl = e.ticket_url || e.source_url || "";
+    const url = /card\s*compass/i.test(rawUrl) || /cardcompass/i.test(rawUrl) ? "" : rawUrl;
     const maps = mapUrl(e);
-    return `<article class="saved-event">
+    return `<article class="saved-event${isPast ? " saved-past" : ""}">
       <div class="saved-title">${esc(e.name || "Card show")}</div>
       <div class="saved-meta">${formatDate(e.date)}${e.city ? ` · ${esc(e.city)}` : ""}${e.venue ? ` · ${esc(e.venue)}` : ""}</div>
       <div class="saved-actions">
+        <button type="button" class="secondary" onclick="openDetails('${escAttr(eventKey(e))}')">Details</button>
         <button type="button" class="secondary" onclick="removeSavedFromAccount('${escAttr(eventKey(e))}')">♥ Saved</button>
         ${maps ? `<a class="secondary" href="${escAttr(maps)}" target="_blank" rel="noopener">🗺️ Map</a>` : ""}
-        ${url !== "#" ? `<a class="primary" href="${escAttr(url)}" target="_blank" rel="noopener">Tickets</a>` : ""}
+        ${url ? `<a class="primary" href="${escAttr(url)}" target="_blank" rel="noopener">Tickets</a>` : ""}
       </div>
     </article>`;
-  }).join("");
+  };
+
+  list.innerHTML = [
+    upcoming.length ? `<div class="saved-group-label">UPCOMING · ${upcoming.length}</div>${upcoming.map(e => savedCard(e)).join("")}` : "",
+    past.length ? `<details class="past-shows"><summary>Past saved shows · ${past.length}</summary>${past.map(e => savedCard(e, true)).join("")}</details>` : ""
+  ].join("");
 }
 
 async function removeSavedFromAccount(key) {
