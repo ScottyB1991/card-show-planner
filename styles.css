@@ -392,3 +392,22 @@ body{overflow-x:hidden}
 @media(max-width:360px){
   .status-choice{font-size:9.5px}
 }
+
+/* The Card Map — compact Next Show action grid */
+.next-show-actions{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:7px;
+}
+.next-show-actions a,.next-show-actions button{
+  width:100%;
+  min-width:0;
+  min-height:42px;
+  padding:9px 8px;
+  border-radius:10px;
+  text-align:center;
+}
+@media(max-width:640px){
+  .next-show-actions{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+  .next-show-actions a,.next-show-actions button{min-height:40px;padding:8px 6px;font-size:11.5px}
+}
