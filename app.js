@@ -6,6 +6,7 @@ let currentEvents = [];
 let supabaseClient = null;
 let savedIds = new Set();
 let savedStatuses = new Map();
+let savedNotes = new Map();
 let currentUser = null;
 let userLocation = null;
 let userPlace = localStorage.getItem("csp_user_place") || "";
@@ -145,15 +146,17 @@ async function loadDemoEvents() {
 async function loadSavedEvents() {
   savedIds = new Set();
   savedStatuses = new Map();
+  savedNotes = new Map();
   currentUser = null;
   if (!supabaseClient) return;
   const { data: { user } } = await supabaseClient.auth.getUser();
   currentUser = user || null;
   if (!currentUser) return;
-  const { data, error } = await supabaseClient.from("saved_events").select("event_id,status").eq("user_id", currentUser.id);
+  const { data, error } = await supabaseClient.from("saved_events").select("event_id,status,notes").eq("user_id", currentUser.id);
   if (error) { console.warn("Could not load saved events:", error); return; }
   savedIds = new Set((data || []).map(row => String(row.event_id)));
   savedStatuses = new Map((data || []).map(row => [String(row.event_id), row.status || "interested"]));
+  savedNotes = new Map((data || []).map(row => [String(row.event_id), row.notes || ""]));
 }
 
 async function connectSupabase() {
@@ -559,11 +562,13 @@ async function toggleSave(key) {
     if (error) return alert(error.message);
     savedIds.delete(key);
     savedStatuses.delete(key);
+    savedNotes.delete(key);
   } else {
     const { error } = await supabaseClient.from("saved_events").insert({ event_id: e.id, user_id: authData.user.id, status: "interested" });
     if (error) return alert(error.message);
     savedIds.add(key);
     savedStatuses.set(key, "interested");
+    savedNotes.set(key, "");
   }
   render();
   renderAccount();
@@ -654,7 +659,9 @@ function renderAccount() {
     const rawUrl = e.ticket_url || e.source_url || "";
     const url = /card\s*compass/i.test(rawUrl) || /cardcompass/i.test(rawUrl) ? "" : rawUrl;
     const maps = mapUrl(e);
-    const currentStatus = savedStatuses.get(eventKey(e)) || "interested";
+    const key = eventKey(e);
+    const currentStatus = savedStatuses.get(key) || "interested";
+    const note = savedNotes.get(key) || "";
     const eventDay = e.date ? new Date(e.date + "T00:00:00") : null;
     const attendedLocked = Boolean(eventDay && eventDay > today);
     return `<article class="saved-event${isPast ? " saved-past" : ""}">
@@ -671,6 +678,17 @@ function renderAccount() {
         }).join("")}
       </div>
       ${attendedLocked ? `<div class="status-hint">✅ Attended unlocks on the show date.</div>` : ""}
+      <details class="show-notes">
+        <summary><span>📝 My Show Notes</span><span class="note-state">${note.trim() ? "Note saved" : "Add note"}</span></summary>
+        <div class="show-notes-editor">
+          <textarea maxlength="1000" placeholder="Trade binder, cards to hunt, people to meet…">${esc(note)}</textarea>
+          <div class="show-notes-actions">
+            <button type="button" class="secondary" onclick="saveShowNote('${escAttr(key)}', this)">Save note</button>
+            <button type="button" class="note-clear" onclick="clearShowNote('${escAttr(key)}', this)">Clear</button>
+          </div>
+          <div class="note-save-status" aria-live="polite"></div>
+        </div>
+      </details>
       <div class="saved-actions">
         <button type="button" class="secondary" onclick="openDetails('${escAttr(eventKey(e))}')">Details</button>
         <button type="button" class="secondary" onclick="removeSavedFromAccount('${escAttr(eventKey(e))}')">♥ Saved</button>
@@ -719,6 +737,47 @@ async function setSavedStatus(key, status) {
   }
 }
 
+async function saveShowNote(key, button) {
+  if (!currentUser || !supabaseClient) return;
+  const e = currentEvents.find(x => eventKey(x) === key);
+  if (!e) return;
+  const panel = button?.closest(".show-notes");
+  const textarea = panel?.querySelector("textarea");
+  const statusEl = panel?.querySelector(".note-save-status");
+  const stateEl = panel?.querySelector(".note-state");
+  if (!textarea) return;
+
+  const note = textarea.value.trim();
+  const previous = savedNotes.get(key) || "";
+  button.disabled = true;
+  if (statusEl) statusEl.textContent = "Saving…";
+
+  const { error } = await supabaseClient.from("saved_events")
+    .update({ notes: note || null })
+    .eq("event_id", e.id)
+    .eq("user_id", currentUser.id);
+
+  button.disabled = false;
+  if (error) {
+    savedNotes.set(key, previous);
+    if (statusEl) statusEl.textContent = "Could not save — try again.";
+    return;
+  }
+
+  savedNotes.set(key, note);
+  if (stateEl) stateEl.textContent = note ? "Note saved" : "Add note";
+  if (statusEl) statusEl.textContent = note ? "Saved ✓" : "Note cleared";
+}
+
+async function clearShowNote(key, button) {
+  const panel = button?.closest(".show-notes");
+  const textarea = panel?.querySelector("textarea");
+  if (!textarea) return;
+  textarea.value = "";
+  const saveButton = panel.querySelector(".show-notes-actions .secondary");
+  if (saveButton) await saveShowNote(key, saveButton);
+}
+
 async function removeSavedFromAccount(key) {
   if (!currentUser || !supabaseClient) return;
   const e = currentEvents.find(x => eventKey(x) === key);
@@ -727,6 +786,7 @@ async function removeSavedFromAccount(key) {
   if (error) return alert(error.message);
   savedIds.delete(key);
   savedStatuses.delete(key);
+  savedNotes.delete(key);
   render();
   renderAccount();
 }
@@ -836,7 +896,7 @@ async function signOut() {
   if (!supabaseClient) return;
   const { error } = await supabaseClient.auth.signOut();
   if (error) return showAuthMessage(error.message);
-  savedIds = new Set(); savedStatuses = new Map(); currentUser = null; updateAuthUI(); render(); renderAccount(); showAuthMessage("Signed out.");
+  savedIds = new Set(); savedStatuses = new Map(); savedNotes = new Map(); currentUser = null; updateAuthUI(); render(); renderAccount(); showAuthMessage("Signed out.");
 }
 
 function esc(v) { return String(v ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }

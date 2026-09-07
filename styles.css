@@ -511,3 +511,72 @@ body{overflow-x:hidden}
   .history-title-row strong{font-size:11px}
   .history-subtitle{font-size:10px}
 }
+
+/* The Card Map — Personal Show Notes */
+.show-notes{
+  margin:10px 0 12px;
+  border:1px solid #484850;
+  border-radius:14px;
+  background:#18181d;
+  overflow:hidden;
+}
+.show-notes summary{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  min-height:44px;
+  padding:10px 13px;
+  cursor:pointer;
+  list-style:none;
+  font-weight:800;
+  font-size:13px;
+}
+.show-notes summary::-webkit-details-marker{display:none}
+.show-notes summary::after{content:"⌄";color:#8f8f99;font-size:14px;margin-left:2px}
+.show-notes[open] summary::after{content:"⌃"}
+.show-notes .note-state{
+  margin-left:auto;
+  color:#9b9ba5;
+  font-size:10px;
+  font-weight:750;
+  white-space:nowrap;
+}
+.show-notes-editor{
+  padding:0 11px 11px;
+  border-top:1px solid #34343b;
+}
+.show-notes textarea{
+  display:block;
+  width:100%;
+  min-height:92px;
+  margin:11px 0 9px;
+  padding:11px 12px;
+  resize:vertical;
+  border:1px solid #4a4a53;
+  border-radius:12px;
+  background:#111115;
+  color:#f4f4f7;
+  font:inherit;
+  font-size:13px;
+  line-height:1.45;
+  box-sizing:border-box;
+}
+.show-notes textarea:focus{outline:2px solid #72727e;outline-offset:1px}
+.show-notes-actions{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
+.show-notes-actions .secondary{min-height:40px;padding:8px 12px}
+.note-clear{
+  min-height:40px;
+  padding:8px 13px;
+  border:1px solid #414149;
+  border-radius:11px;
+  background:transparent;
+  color:#aaaab4;
+  font-weight:750;
+}
+.note-save-status{min-height:16px;margin-top:6px;color:#9d9da7;font-size:10px;text-align:right}
+@media(max-width:420px){
+  .show-notes{margin:9px 0 11px}
+  .show-notes summary{min-height:42px;padding:9px 11px;font-size:12px}
+  .show-notes textarea{min-height:84px;font-size:12px}
+}
