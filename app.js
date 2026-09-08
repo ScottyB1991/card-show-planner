@@ -639,6 +639,9 @@ function renderAccount() {
   const count = $("savedCount");
   const nextCard = $("nextShowCard");
   const plannerStats = $("plannerStats");
+  const reminderCard = $("showReminders");
+  const reminderContent = $("reminderContent");
+  const reminderCount = $("reminderCount");
   if (!email || !list || !count) return;
   email.textContent = currentUser?.email || "Signed in";
 
@@ -651,6 +654,29 @@ function renderAccount() {
   today.setHours(0, 0, 0, 0);
   const upcoming = saved.filter(e => !e.date || new Date(e.date + "T00:00:00") >= today);
   const past = saved.filter(e => e.date && new Date(e.date + "T00:00:00") < today);
+
+  // In-app reminders are derived from shows marked Going; no extra database state required.
+  const goingShows = upcoming
+    .filter(e => e.date && (savedStatuses.get(eventKey(e)) || "interested") === "going")
+    .sort((a, b) => String(a.date).localeCompare(String(b.date)));
+  if (reminderCard && reminderContent && reminderCount) {
+    reminderCard.hidden = false;
+    reminderCount.textContent = goingShows.length ? `${goingShows.length} planned` : "";
+    if (!goingShows.length) {
+      reminderContent.innerHTML = `<div class="reminder-empty">Mark an upcoming saved show as <strong>🎟️ Going</strong> and its countdown will appear here.</div>`;
+    } else {
+      reminderContent.innerHTML = goingShows.slice(0, 3).map(e => {
+        const eventDate = new Date(e.date + "T00:00:00");
+        const days = Math.max(0, Math.round((eventDate - today) / 86400000));
+        let icon = "📅", label = `${days} days away`, tone = "calm";
+        if (days === 0) { icon = "🎴"; label = "TODAY — Card show day!"; tone = "today"; }
+        else if (days === 1) { icon = "🔥"; label = "Tomorrow!"; tone = "soon"; }
+        else if (days <= 7) { icon = "🔔"; label = days === 7 ? "One week to go!" : `${days} days to go!`; tone = "soon"; }
+        else if (days <= 14) { icon = "🔔"; label = `${days} days to go`; tone = "near"; }
+        return `<button type="button" class="reminder-item ${tone}" onclick="openDetails('${escAttr(eventKey(e))}')"><span class="reminder-icon">${icon}</span><span class="reminder-copy"><strong>${esc(e.name || "Card show")}</strong><small>${esc(label)} · ${formatDate(e.date)}${e.city ? ` · ${esc(e.city)}` : ""}</small></span><span class="reminder-arrow">›</span></button>`;
+      }).join("") + (goingShows.length > 3 ? `<div class="reminder-more">+${goingShows.length - 3} more planned show${goingShows.length - 3 === 1 ? "" : "s"}</div>` : "");
+    }
+  }
 
   const statusCount = status => saved.filter(e => (savedStatuses.get(eventKey(e)) || "interested") === status).length;
   if (plannerStats) {

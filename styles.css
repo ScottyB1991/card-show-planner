@@ -607,3 +607,14 @@ dialog.dialog-card{margin:auto;max-width:calc(100% - 18px)}
   .account-summary,.next-show-card,.saved-event,.collector-journey,.show-notes{width:100%;max-width:100%;margin-left:auto;margin-right:auto}
   input,select,textarea,button,a{min-width:0}
 }
+
+
+/* The Card Map — in-app show reminders */
+.reminder-card{margin-top:12px;padding:13px;border:1px solid #414149;border-radius:16px;background:#18181d}
+.reminder-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px}
+.reminder-head strong{font-size:14px}.reminder-head span{color:#9999a3;font-size:10px;font-weight:700}
+.reminder-content{display:grid;gap:7px}.reminder-empty{padding:9px 3px;color:#9b9ba5;font-size:12px;line-height:1.45}
+.reminder-item{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:9px;width:100%;padding:10px;border:1px solid #383840;border-radius:12px;background:#202026;color:#f4f4f7;text-align:left;cursor:pointer}
+.reminder-item:active{transform:translateY(1px)}.reminder-icon{font-size:18px}.reminder-copy{min-width:0}.reminder-copy strong{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px}.reminder-copy small{display:block;margin-top:3px;color:#aaaab4;font-size:10px;line-height:1.3}.reminder-arrow{color:#8f8f99;font-size:20px}
+.reminder-item.soon{border-color:#5a4d46}.reminder-item.today{border-color:#66606f}.reminder-more{padding:3px 4px 0;color:#9999a3;font-size:10px;text-align:right}
+@media(max-width:420px){.reminder-card{padding:11px}.reminder-item{padding:9px}.reminder-copy strong{font-size:11px}.reminder-copy small{font-size:9px}}
