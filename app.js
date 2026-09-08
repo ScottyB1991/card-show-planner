@@ -1,7 +1,7 @@
 const PROJECT_URL_DEFAULT = "https://fafkcpkhwjopelvkupwe.supabase.co";
 // PUBLIC browser key only. Paste your Supabase publishable key here before deploying v23.
 // Never use a secret/service-role key in frontend code.
-const PROJECT_PUBLISHABLE_KEY = "PASTE_YOUR_SUPABASE_PUBLISHABLE_KEY_HERE";
+const PROJECT_PUBLISHABLE_KEY = "sb_publishable_FyeuAfK7T0xIrsdR0iq5pg_1pybxckk";
 const EVENTS_FILE = "events.json";
 
 let demoEvents = [];
