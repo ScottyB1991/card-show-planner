@@ -919,3 +919,68 @@ dialog.dialog-card{margin:auto;max-width:calc(100% - 18px)}
 @media(max-width:360px){
   .trip-planner-actions a{font-size:12px;padding-inline:4px}
 }
+
+/* THE CARD MAP v25 — pre-launch polish */
+html{scroll-behavior:smooth}
+body{-webkit-tap-highlight-color:transparent}
+button,a,input,select,textarea{touch-action:manipulation}
+button,a{ -webkit-user-select:none; user-select:none }
+input,select,textarea{accent-color:currentColor}
+
+/* Keep keyboard navigation obvious without adding visual noise for taps. */
+:where(button,a,input,select,textarea,[tabindex]):focus-visible{
+  outline:2px solid currentColor;
+  outline-offset:3px;
+}
+
+/* Cleaner first impression and more resilient text wrapping. */
+.topbar h1,.hero h2,.event h3,.details-body h2{letter-spacing:-.015em}
+.event h3,.details-body h2,.saved-title,.next-show-title{overflow-wrap:anywhere}
+.hero p{max-width:42ch}
+#connectionBadge{opacity:.68;font-size:10px}
+
+/* Slightly clearer interaction states without changing the existing design language. */
+.actions button,.actions a,.primary,.secondary,.small-btn,.match-filter-btn,.view-btn,
+.trip-planner-actions a,.favourite-toggle,.status-choice{
+  transition:transform .12s ease,opacity .12s ease,border-color .12s ease,background .12s ease;
+}
+:where(.actions button,.actions a,.primary,.secondary,.small-btn,.match-filter-btn,.view-btn,.trip-planner-actions a,.favourite-toggle,.status-choice):active{
+  transform:translateY(1px);
+}
+button:disabled,[aria-disabled="true"]{opacity:.5;cursor:not-allowed}
+
+/* Trip planner: keep it compact and scan-friendly on phones. */
+.trip-planner{margin-top:.85rem}
+.trip-planner-head{display:grid;gap:1px}
+.trip-planner-actions a{line-height:1.15}
+
+/* Quiet launch footer — trust signal, not another dashboard card. */
+.site-footer{
+  width:100%;
+  max-width:760px;
+  margin:4px auto 0;
+  padding:8px 18px calc(24px + env(safe-area-inset-bottom));
+  display:grid;
+  gap:4px;
+  text-align:center;
+  color:#777983;
+}
+.site-footer strong{font-size:11px;letter-spacing:.08em}
+.site-footer span{font-size:11px;font-weight:750}
+.site-footer small{font-size:9.5px;line-height:1.4;opacity:.8}
+
+/* Make open dialogs feel deliberate and stop background scroll chaining. */
+dialog{overscroll-behavior:contain}
+dialog::backdrop{backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
+
+@media(max-width:640px){
+  #connectionBadge{margin-top:8px}
+  .site-footer{padding-left:14px;padding-right:14px}
+  .hero p{max-width:none}
+  .trip-planner{padding:11px}
+}
+
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}
+}
