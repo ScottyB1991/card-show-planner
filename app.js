@@ -671,6 +671,19 @@ function renderScoutPicks(today) {
     .sort((a, b) => {
       const rankDiff = scoutMatchRank(b) - scoutMatchRank(a);
       if (rankDiff) return rankDiff;
+
+      // For equally strong matches, prefer the nearer show when
+      // the collector has set a location. Unknown distances stay last.
+      if (userLocation) {
+        const da = eventDistanceMiles(a);
+        const db = eventDistanceMiles(b);
+        if (da != null || db != null) {
+          if (da == null) return 1;
+          if (db == null) return -1;
+          if (da !== db) return da - db;
+        }
+      }
+
       return String(a.date || "").localeCompare(String(b.date || ""));
     })
     .slice(0, 3);
@@ -682,7 +695,9 @@ function renderScoutPicks(today) {
   }
 
   section.hidden = false;
-  if (hint) hint.textContent = `Top ${picks.length} based on your saved card preferences.`;
+  if (hint) hint.textContent = userLocation
+    ? `Top ${picks.length} based on your saved card preferences, with distance breaking ties.`
+    : `Top ${picks.length} based on your saved card preferences.`;
   list.innerHTML = picks.map(eventCard).join("");
 }
 
