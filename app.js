@@ -673,6 +673,24 @@ function scoutBehaviourBadge(e) {
   return `<span class="tag scout-boost">🧭 Scout boost · activity matches</span>`;
 }
 
+function scoutWhy(e) {
+  const matches = matchingCardInterests(e);
+  if (!matches.length) return "";
+
+  const labels = matches.map(value =>
+    (CARD_CATEGORY_LABELS[value] || value).replace(/^\S+\s*/, "")
+  );
+  const distance = eventDistanceMiles(e);
+  const behaviour = scoutBehaviourScore(e) > 0;
+
+  const parts = [];
+  parts.push(`${matches.length === cardInterests.length && cardInterests.length >= 2 ? "Great" : matches.length >= 2 ? "Strong" : "Good"} match for ${labels.join(" + ")}`);
+  if (distance != null) parts.push(`~${formatDistance(distance)} away`);
+  if (behaviour) parts.push("supported by your saved/favourite/Going activity");
+
+  return `<div class="scout-why"><strong>Why Scout picked this:</strong> ${esc(parts.join(" · "))}.</div>`;
+}
+
 function renderScoutPicks(today) {
   const section = $("scoutPicksSection");
   const list = $("scoutPicksList");
@@ -730,7 +748,7 @@ function renderScoutPicks(today) {
   if (hint) hint.textContent = userLocation
     ? `Top ${picks.length} based on your card preferences, distance and light activity signals.`
     : `Top ${picks.length} based on your card preferences, with light activity signals.`;
-  list.innerHTML = picks.map(e => eventCard(e, { scoutPick: true })).join("");
+  list.innerHTML = picks.map((e, index) => eventCard(e, { scoutPick: true, scoutIndex: index })).join("");
 }
 
 function openDetails(key) {
@@ -796,7 +814,9 @@ function eventCard(e, options = {}) {
       <span class="tag">${esc(e.pokemon_relevance || "Card show")}</span>
     </div>
     <div class="meta">${esc(e.venue || "")}${e.city ? ` · ${esc(e.city)}` : ""}${e.postcode ? ` · ${esc(e.postcode)}` : ""}<br>${esc(e.time || "")}${e.price ? ` · ${esc(e.price)}` : ""}</div>
+    ${options.scoutPick && options.scoutIndex === 0 ? `<div class="scout-top-pick">🥇 Top Scout Pick</div>` : ""}
     <div class="tags">${matchBadge(e)}${distance != null ? `<span class="tag distance-chip">📏 ~${esc(formatDistance(distance))} straight-line</span>` : ""}${options.scoutPick ? scoutBehaviourBadge(e) : ""}${e.region ? `<span class="tag">${esc(regionName(e.region))}</span>` : ""}</div>
+    ${options.scoutPick ? scoutWhy(e) : ""}
     <div class="actions"><button type="button" class="secondary" onclick="openDetails(\'${escAttr(key)}\')">View details</button>
       <button class="${saved ? "secondary saved" : "secondary"}" onclick="toggleSave('${escAttr(key)}')">${saved ? "♥ Saved" : "♡ Save event"}</button>
       ${url !== "#" ? `<a class="primary" href="${escAttr(url)}" target="_blank" rel="noopener">Website / tickets ↗</a>` : ""}

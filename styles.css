@@ -839,3 +839,8 @@ dialog.dialog-card{margin:auto;max-width:calc(100% - 18px)}
 .scout-category-signal strong{font-size:13px}.scout-category-signal span{font-size:11px;color:#aaa7b1;text-align:right}
 .scout-signals-empty{padding:10px;color:#aaa7b1;text-align:center;font-size:12px;line-height:1.4}
 @media(max-width:420px){.scout-signals-summary{grid-template-columns:repeat(2,1fr)}.scout-category-signal{align-items:flex-start;flex-direction:column}.scout-category-signal span{text-align:left}}
+
+/* v20 — explainable Scout Picks */
+.scout-top-pick{display:inline-block;margin:0 0 10px;padding:7px 11px;border:1px solid #6a6670;border-radius:999px;font-weight:800;font-size:.9rem;background:#15131a}
+.scout-why{margin:10px 0 2px;padding:11px 13px;border-left:3px solid #77727e;border-radius:8px;background:#15141a;line-height:1.45;color:#d6d3dc;font-size:.94rem}
+.scout-why strong{color:#fff}
