@@ -844,3 +844,23 @@ dialog.dialog-card{margin:auto;max-width:calc(100% - 18px)}
 .scout-top-pick{display:inline-block;margin:0 0 10px;padding:7px 11px;border:1px solid #6a6670;border-radius:999px;font-weight:800;font-size:.9rem;background:#15131a}
 .scout-why{margin:10px 0 2px;padding:11px 13px;border-left:3px solid #77727e;border-radius:8px;background:#15141a;line-height:1.45;color:#d6d3dc;font-size:.94rem}
 .scout-why strong{color:#fff}
+
+
+/* THE CARD MAP v22 — Scout Picks mobile polish */
+.scout-picks-section{padding:16px}
+.scout-picks-head{margin-bottom:11px}
+.scout-picks-head p{margin-bottom:0;line-height:1.35}
+.scout-picks-list{gap:11px}
+.scout-picks-list .event{padding:13px}
+.scout-picks-list .event .meta{margin-top:.5rem;line-height:1.4}
+.scout-picks-list .event .tags{margin-top:.5rem}
+.scout-top-pick{margin:0 0 7px;padding:5px 9px;font-size:.78rem}
+.scout-why{margin:7px 0 0;padding:8px 10px;border-left-width:2px;border-radius:7px;line-height:1.35;font-size:.82rem}
+.scout-picks-list .event .actions{margin-top:8px;gap:6px}
+@media(max-width:640px){
+  .scout-picks-section{padding:11px;margin:18px 0 22px}
+  .scout-picks-list{gap:9px}
+  .scout-picks-list .event{padding:12px}
+  .scout-picks-list .event .actions button,.scout-picks-list .event .actions a{min-height:40px;padding:7px 9px}
+  .scout-why{font-size:.78rem;padding:7px 9px}
+}

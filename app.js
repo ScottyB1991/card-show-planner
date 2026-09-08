@@ -726,12 +726,12 @@ function scoutWhy(e) {
   const timing = scoutTiming(e);
 
   const parts = [];
-  parts.push(`${matches.length === cardInterests.length && cardInterests.length >= 2 ? "Great" : matches.length >= 2 ? "Strong" : "Good"} match for ${labels.join(" + ")}`);
+  parts.push(`${matches.length === cardInterests.length && cardInterests.length >= 2 ? "Great" : matches.length >= 2 ? "Strong" : "Good"} match: ${labels.join(" + ")}`);
   if (distance != null) parts.push(`~${formatDistance(distance)} away`);
   if (timing) parts.push(timing.why);
-  if (behaviour) parts.push("supported by your saved/favourite/Going activity");
+  if (behaviour) parts.push("activity boost");
 
-  return `<div class="scout-why"><strong>Why Scout picked this:</strong> ${esc(parts.join(" · "))}.</div>`;
+  return `<div class="scout-why"><strong>Why:</strong> ${esc(parts.join(" · "))}</div>`;
 }
 
 function renderScoutPicks(today) {
