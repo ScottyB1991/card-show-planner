@@ -864,3 +864,58 @@ dialog.dialog-card{margin:auto;max-width:calc(100% - 18px)}
   .scout-picks-list .event .actions button,.scout-picks-list .event .actions a{min-height:40px;padding:7px 9px}
   .scout-why{font-size:.78rem;padding:7px 9px}
 }
+
+/* THE CARD MAP v24 — Plan Your Trip */
+.trip-planner{
+  margin:1rem 0 .2rem;
+  padding:12px;
+  border:1px solid #55535e;
+  border-radius:14px;
+  background:#111015;
+}
+.trip-planner-head strong{
+  display:block;
+  font-size:16px;
+}
+.trip-planner-head span{
+  display:block;
+  margin-top:2px;
+  color:#aaa7b1;
+  font-size:12px;
+  font-weight:700;
+}
+.trip-planner-actions{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:7px;
+  margin-top:10px;
+}
+.trip-planner-actions a{
+  min-height:46px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  padding:8px 6px;
+  border:1px solid #55535e;
+  border-radius:11px;
+  background:#29272f;
+  color:#fff;
+  text-decoration:none;
+  text-align:center;
+  font-size:13px;
+  font-weight:800;
+}
+.trip-planner-actions a:active{
+  transform:translateY(1px);
+}
+.trip-planner-note{
+  display:block;
+  margin-top:8px;
+  color:#8f8c97;
+  font-size:10px;
+  line-height:1.35;
+}
+@media(max-width:360px){
+  .trip-planner-actions a{font-size:12px;padding-inline:4px}
+}
