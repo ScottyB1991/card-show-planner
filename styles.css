@@ -700,3 +700,83 @@ dialog.dialog-card{margin:auto;max-width:calc(100% - 18px)}
     margin-inline:auto;
   }
 }
+
+/* Wobble Goblin Fix v3 — size the actual dialogs, not just their inner cards */
+#detailsDialog,
+#accountDialog,
+#settingsDialog,
+#authDialog{
+  box-sizing:border-box;
+  max-width:calc(100vw - 24px) !important;
+  margin:auto !important;
+  overflow-x:hidden !important;
+  overscroll-behavior-x:none;
+}
+
+#detailsDialog{
+  width:min(620px, calc(100vw - 24px)) !important;
+  padding:0 !important;
+}
+
+#detailsDialog .details-card{
+  position:relative;
+  width:100% !important;
+  max-width:100% !important;
+  min-width:0 !important;
+  margin:0 !important;
+  padding:20px !important;
+  overflow-x:hidden !important;
+}
+
+#detailsDialog #detailsContent{
+  width:100% !important;
+  max-width:100% !important;
+  min-width:0 !important;
+}
+
+/* v2 accidentally made every direct child 100% wide, including the X button */
+#detailsDialog #detailsCloseBtn{
+  position:absolute !important;
+  top:8px !important;
+  right:8px !important;
+  left:auto !important;
+  width:44px !important;
+  min-width:44px !important;
+  max-width:44px !important;
+  height:44px !important;
+  padding:6px !important;
+  margin:0 !important;
+  display:grid !important;
+  place-items:center !important;
+  z-index:20;
+}
+
+#accountDialog,
+#settingsDialog,
+#authDialog{
+  width:min(560px, calc(100vw - 24px)) !important;
+  padding:0 !important;
+}
+
+#accountDialog > .dialog-card,
+#settingsDialog > .dialog-card,
+#authDialog > .dialog-card{
+  width:100% !important;
+  max-width:100% !important;
+  min-width:0 !important;
+  margin:0 !important;
+}
+
+@media(max-width:640px){
+  #detailsDialog,
+  #accountDialog,
+  #settingsDialog,
+  #authDialog{
+    width:calc(100vw - 20px) !important;
+    max-width:calc(100vw - 20px) !important;
+  }
+
+  #detailsDialog .details-card{
+    padding:16px !important;
+  }
+}
