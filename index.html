@@ -154,6 +154,12 @@
           <div class="favourites-head"><strong>⭐ Favourite Shows</strong><span id="favouritesCount"></span></div>
           <div id="favouritesContent" class="favourites-content">Star the shows you’re most excited for. They’ll live here.</div>
         </section>
+        <section id="scoutSignalsCard" class="scout-signals-card" aria-label="Scout behaviour signals">
+          <div class="scout-signals-head"><strong>🧭 Scout Signals</strong><span>v1</span></div>
+          <p class="scout-signals-copy">A transparent snapshot of your activity. These signals are not used to rank Scout Picks yet.</p>
+          <div id="scoutSignalsSummary" class="scout-signals-summary"></div>
+          <div id="scoutSignalsCategories" class="scout-signals-categories"></div>
+        </section>
         <div id="savedEventsList" class="saved-events"></div>
       </section>
       <section id="showReminders" class="reminder-card" aria-label="Upcoming show reminders">
@@ -194,7 +200,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
   <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
-  <script src="app.js?v=17"></script>
+  <script src="app.js?v=18"></script>
 
 <dialog id="detailsDialog" class="modal">
   <div class="modal-card details-card">

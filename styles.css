@@ -824,3 +824,18 @@ dialog.dialog-card{margin:auto;max-width:calc(100% - 18px)}
 .scout-picks-list{display:grid;gap:14px}
 .scout-picks-list .event{margin:0}
 @media(max-width:640px){.scout-picks-section{padding:14px;margin:22px 0 26px;border-radius:20px}}
+
+/* Scout Behaviour Profile v1 — transparent activity signals only; no ranking impact yet */
+.scout-signals-card{margin:14px 0 18px;padding:16px;border:1px solid #56535d;border-radius:20px;background:#0b0a0f}
+.scout-signals-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:7px}
+.scout-signals-head strong{font-size:18px}.scout-signals-head span{font-size:12px;font-weight:800;color:#aaa7b1}
+.scout-signals-copy{margin:0 0 13px;color:#aaa7b1;line-height:1.4;font-size:13px}
+.scout-signals-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.scout-signal-stat{display:grid;place-items:center;gap:2px;padding:10px 5px;border-radius:14px;background:#16151b;text-align:center}
+.scout-signal-stat span{font-size:17px}.scout-signal-stat strong{font-size:20px}.scout-signal-stat small{font-size:10px;color:#aaa7b1;font-weight:800}
+.scout-signals-label{margin:2px 0 7px;color:#8f8c96;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.06em}
+.scout-signals-categories{display:grid;gap:7px}
+.scout-category-signal{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 10px;border-radius:12px;background:#16151b}
+.scout-category-signal strong{font-size:13px}.scout-category-signal span{font-size:11px;color:#aaa7b1;text-align:right}
+.scout-signals-empty{padding:10px;color:#aaa7b1;text-align:center;font-size:12px;line-height:1.4}
+@media(max-width:420px){.scout-signals-summary{grid-template-columns:repeat(2,1fr)}.scout-category-signal{align-items:flex-start;flex-direction:column}.scout-category-signal span{text-align:left}}

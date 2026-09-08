@@ -861,6 +861,83 @@ function renderCollectorJourney(saved, today) {
   }, 80);
 }
 
+function buildScoutBehaviourProfile(saved) {
+  const categories = {};
+  Object.keys(CARD_CATEGORY_LABELS).forEach(key => {
+    categories[key] = { saved: 0, favourite: 0, going: 0, attended: 0 };
+  });
+
+  let favourites = 0;
+  let going = 0;
+  let attended = 0;
+
+  saved.forEach(e => {
+    const key = eventKey(e);
+    const status = savedStatuses.get(key) || "interested";
+    const favourite = Boolean(savedFavourites.get(key));
+    if (favourite) favourites += 1;
+    if (status === "going") going += 1;
+    if (status === "attended") attended += 1;
+
+    const verifiedCategories = Array.isArray(e.card_categories)
+      ? [...new Set(e.card_categories.map(normaliseCardCategory).filter(value => categories[value]))]
+      : [];
+
+    verifiedCategories.forEach(category => {
+      categories[category].saved += 1;
+      if (favourite) categories[category].favourite += 1;
+      if (status === "going") categories[category].going += 1;
+      if (status === "attended") categories[category].attended += 1;
+    });
+  });
+
+  return {
+    saved: saved.length,
+    favourites,
+    going,
+    attended,
+    categories
+  };
+}
+
+function renderScoutBehaviourProfile(saved) {
+  const card = $("scoutSignalsCard");
+  const summary = $("scoutSignalsSummary");
+  const categoriesEl = $("scoutSignalsCategories");
+  if (!card || !summary || !categoriesEl) return;
+
+  const profile = buildScoutBehaviourProfile(saved);
+  card.hidden = false;
+  summary.innerHTML = `
+    <div class="scout-signal-stat"><span>♡</span><strong>${profile.saved}</strong><small>Saved</small></div>
+    <div class="scout-signal-stat"><span>⭐</span><strong>${profile.favourites}</strong><small>Favourites</small></div>
+    <div class="scout-signal-stat"><span>🎟️</span><strong>${profile.going}</strong><small>Going</small></div>
+    <div class="scout-signal-stat"><span>✅</span><strong>${profile.attended}</strong><small>Attended</small></div>`;
+
+  const activeCategories = Object.entries(profile.categories)
+    .filter(([, counts]) => counts.saved > 0)
+    .sort((a, b) => {
+      const totalA = a[1].saved + a[1].favourite + a[1].going + a[1].attended;
+      const totalB = b[1].saved + b[1].favourite + b[1].going + b[1].attended;
+      return totalB - totalA || a[0].localeCompare(b[0]);
+    });
+
+  if (!activeCategories.length) {
+    categoriesEl.innerHTML = `<div class="scout-signals-empty">Save shows with verified card categories and Scout will start building a transparent activity picture here.</div>`;
+    return;
+  }
+
+  categoriesEl.innerHTML = `
+    <div class="scout-signals-label">Activity by verified card type</div>
+    ${activeCategories.map(([category, counts]) => {
+      const label = CARD_CATEGORY_LABELS[category] || category;
+      return `<div class="scout-category-signal">
+        <strong>${esc(label)}</strong>
+        <span>Saved ${counts.saved} · ⭐ ${counts.favourite} · 🎟️ ${counts.going} · ✅ ${counts.attended}</span>
+      </div>`;
+    }).join("")}`;
+}
+
 function renderAccount() {
   const email = $("accountEmail");
   const list = $("savedEventsList");
@@ -883,6 +960,7 @@ function renderAccount() {
   today.setHours(0, 0, 0, 0);
   const upcoming = saved.filter(e => !e.date || new Date(e.date + "T00:00:00") >= today);
   const past = saved.filter(e => e.date && new Date(e.date + "T00:00:00") < today);
+  renderScoutBehaviourProfile(saved);
 
   // In-app reminders are derived from shows marked Going; no extra database state required.
   const goingShows = upcoming
