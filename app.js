@@ -9,6 +9,7 @@ let savedStatuses = new Map();
 let savedNotes = new Map();
 let savedFavourites = new Map();
 let cardInterests = [];
+let matchesOnly = false;
 let currentUser = null;
 let userLocation = null;
 let userPlace = localStorage.getItem("csp_user_place") || "";
@@ -249,6 +250,7 @@ async function saveCardPreferences() {
   }
   cardInterests = interests;
   renderCardPreferences();
+  render();
   if (status) { status.textContent = "✓ Saved"; setTimeout(() => { if (status.textContent === "✓ Saved") status.textContent = ""; }, 2200); }
 }
 
@@ -416,7 +418,33 @@ function renderMap(events) {
   else showsMap.setView([54.3, -2.6], 5);
 }
 
+function updateMatchFilterUI() {
+  const btn = $("matchesOnlyBtn");
+  const hint = $("matchesOnlyHint");
+  if (!btn) return;
+
+  const ready = Boolean(currentUser && cardInterests.length);
+  if (!ready) matchesOnly = false;
+
+  btn.classList.toggle("active", ready && matchesOnly);
+  btn.setAttribute("aria-pressed", String(ready && matchesOnly));
+
+  if (!currentUser) {
+    btn.textContent = "⚡ Sign in for matches";
+    if (hint) hint.textContent = "Sign in to use your saved card preferences.";
+  } else if (!cardInterests.length) {
+    btn.textContent = "⚡ Set Card Preferences";
+    if (hint) hint.textContent = "Choose your cards in My Card Map to unlock matching.";
+  } else {
+    btn.textContent = matchesOnly ? "⚡ Showing My Matches" : "⚡ Matches My Cards";
+    if (hint) hint.textContent = matchesOnly
+      ? "Only verified shows matching at least one saved preference are shown."
+      : "Show events matching your saved card preferences.";
+  }
+}
+
 function render() {
+  updateMatchFilterUI();
   const q = $("searchInput").value.trim().toLowerCase();
   const region = $("regionSelect").value;
   const dateFilter = $("dateSelect").value;
@@ -438,7 +466,8 @@ function render() {
         dateMatches = eventDate > monthEnd;
       }
     }
-    return (!q || hay.includes(q)) && (!region || e.region === region) && dateMatches;
+    const preferenceMatches = !matchesOnly || matchingCardInterests(e).length > 0;
+    return (!q || hay.includes(q)) && (!region || e.region === region) && dateMatches && preferenceMatches;
   });
   if (userLocation) {
     filtered = filtered.slice().sort((a, b) => {
@@ -451,9 +480,9 @@ function render() {
     });
   }
   lastFilteredEvents = filtered;
-  $("countLabel").textContent = `${filtered.length} show${filtered.length === 1 ? "" : "s"}${userLocation ? " · nearest first" : ""}`;
+  $("countLabel").textContent = `${filtered.length} show${filtered.length === 1 ? "" : "s"}${matchesOnly ? " · matching your cards" : ""}${userLocation ? " · nearest first" : ""}`;
   $("eventsList").innerHTML = filtered.length ? filtered.map(eventCard).join("") :
-    `<div class="empty">No shows match those filters.</div>`;
+    `<div class="empty">${matchesOnly ? "No verified shows currently match your card preferences and other filters." : "No shows match those filters."}</div>`;
   if (currentView === "map") renderMap(filtered);
 }
 
@@ -1177,6 +1206,19 @@ $("mapViewBtn").addEventListener("click", () => setView("map"));
 $("searchInput").addEventListener("input", render);
 $("regionSelect").addEventListener("change", render);
 $("dateSelect").addEventListener("change", render);
+$("matchesOnlyBtn").addEventListener("click", () => {
+  if (!currentUser) {
+    $("authDialog").showModal();
+    return;
+  }
+  if (!cardInterests.length) {
+    renderAccount();
+    $("accountDialog").showModal();
+    return;
+  }
+  matchesOnly = !matchesOnly;
+  render();
+});
 $("authBtn").addEventListener("click", async () => {
   if (!supabaseClient) {
     $("authDialog").showModal();

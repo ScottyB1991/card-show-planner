@@ -807,3 +807,11 @@ dialog.dialog-card{margin:auto;max-width:calc(100% - 18px)}
 /* Card Preferences Phase 2 — verified show matching */
 .preference-match{border-color:#8d8996;background:#302d38;color:#fff;font-weight:800}
 .details-match{margin:12px 0 4px}.details-match .preference-match{display:inline-flex}
+
+
+/* Card Preferences Phase 3 — Matches My Cards discovery filter */
+.match-filter-wrap{grid-column:1/-1;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding-top:2px}
+.match-filter-btn{min-height:44px;border:1px solid #56535d;border-radius:999px;background:#16151b;color:#dedce3;padding:9px 14px;font-weight:900;cursor:pointer}
+.match-filter-btn.active{background:#47444f;border-color:#aaa6b3;color:#fff;box-shadow:inset 0 0 0 1px #8d8996}
+.match-filter-hint{font-size:12px;color:#8f8c96;line-height:1.35}
+@media(max-width:640px){.match-filter-wrap{display:grid;gap:6px}.match-filter-btn{width:100%}.match-filter-hint{text-align:center}}
