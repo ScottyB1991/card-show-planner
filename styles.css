@@ -629,3 +629,74 @@ dialog.dialog-card{margin:auto;max-width:calc(100% - 18px)}
 .favourites-content{display:grid;gap:8px}.favourite-empty{color:#c1bec7;line-height:1.45}
 .favourite-item{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;width:100%;padding:11px 12px;border:1px solid #55535e;border-radius:12px;background:#29272f;color:#fff;text-align:left}
 .favourite-item strong{display:block;font-size:14px}.favourite-item small{display:block;margin-top:2px;color:#b7b4bd;font-size:12px}.favourite-more{color:#aaa7b1;font-size:12px;padding:2px 4px}
+
+/* Wobble Goblin Fix v2 — lock modal/card content to the mobile viewport */
+.dialog-card,
+.account-card,
+.details-card{
+  overflow-x:hidden !important;
+  overscroll-behavior-x:none;
+}
+
+.account-card{
+  overflow-y:auto;
+}
+
+.details-card{
+  overflow-y:auto;
+}
+
+.account-card > *,
+.details-card > *,
+.details-body,
+.saved-section,
+.saved-events,
+.saved-event,
+.saved-actions,
+.show-status-picker,
+.show-notes,
+.next-show-card,
+.collector-journey,
+.reminder-card,
+.favourites-card{
+  width:100%;
+  max-width:100%;
+  min-width:0;
+}
+
+.saved-event *,
+.details-body *,
+.account-summary *,
+.next-show-card *{
+  min-width:0;
+}
+
+.saved-title,
+.saved-meta,
+.details-description,
+.details-meta,
+.account-summary,
+.favourite-item strong,
+.favourite-item small{
+  overflow-wrap:anywhere;
+  word-break:normal;
+}
+
+@media(max-width:640px){
+  .dialog-card,
+  .account-card,
+  .details-card{
+    left:auto;
+    right:auto;
+    margin-inline:auto !important;
+  }
+
+  .saved-event,
+  .next-show-card,
+  .collector-journey,
+  .reminder-card,
+  .favourites-card,
+  .show-notes{
+    margin-inline:auto;
+  }
+}
