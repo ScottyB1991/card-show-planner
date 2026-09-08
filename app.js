@@ -673,6 +673,47 @@ function scoutBehaviourBadge(e) {
   return `<span class="tag scout-boost">🧭 Scout boost · activity matches</span>`;
 }
 
+function scoutTiming(e) {
+  if (!e.date) return null;
+  const eventDate = new Date(e.date + "T00:00:00");
+  if (Number.isNaN(eventDate.getTime())) return null;
+
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const daysUntil = Math.round((eventDate - today) / 86400000);
+  if (daysUntil < 0) return null;
+
+  // Weekend labels are calendar-based: the coming Sat/Sun is "This weekend",
+  // and the Sat/Sun after that is "Next weekend".
+  const day = today.getDay();
+  const daysToSaturday = (6 - day + 7) % 7;
+  const thisSaturday = new Date(today);
+  thisSaturday.setDate(today.getDate() + daysToSaturday);
+  const thisSunday = new Date(thisSaturday);
+  thisSunday.setDate(thisSaturday.getDate() + 1);
+  const nextSaturday = new Date(thisSaturday);
+  nextSaturday.setDate(thisSaturday.getDate() + 7);
+  const nextSunday = new Date(nextSaturday);
+  nextSunday.setDate(nextSaturday.getDate() + 1);
+
+  if (eventDate >= thisSaturday && eventDate <= thisSunday) {
+    return { badge: "🔥 This weekend", why: "this weekend" };
+  }
+  if (eventDate >= nextSaturday && eventDate <= nextSunday) {
+    return { badge: "📅 Next weekend", why: "next weekend" };
+  }
+  if (daysUntil <= 14) {
+    const wording = daysUntil === 0 ? "today" : daysUntil === 1 ? "tomorrow" : `in ${daysUntil} days`;
+    return { badge: `⏳ Coming up · ${daysUntil === 0 ? "Today" : daysUntil === 1 ? "Tomorrow" : `${daysUntil} days`}`, why: wording };
+  }
+  return null;
+}
+
+function scoutTimingBadge(e) {
+  const timing = scoutTiming(e);
+  return timing ? `<span class="tag scout-timing">${esc(timing.badge)}</span>` : "";
+}
+
 function scoutWhy(e) {
   const matches = matchingCardInterests(e);
   if (!matches.length) return "";
@@ -682,10 +723,12 @@ function scoutWhy(e) {
   );
   const distance = eventDistanceMiles(e);
   const behaviour = scoutBehaviourScore(e) > 0;
+  const timing = scoutTiming(e);
 
   const parts = [];
   parts.push(`${matches.length === cardInterests.length && cardInterests.length >= 2 ? "Great" : matches.length >= 2 ? "Strong" : "Good"} match for ${labels.join(" + ")}`);
   if (distance != null) parts.push(`~${formatDistance(distance)} away`);
+  if (timing) parts.push(timing.why);
   if (behaviour) parts.push("supported by your saved/favourite/Going activity");
 
   return `<div class="scout-why"><strong>Why Scout picked this:</strong> ${esc(parts.join(" · "))}.</div>`;
@@ -815,7 +858,7 @@ function eventCard(e, options = {}) {
     </div>
     <div class="meta">${esc(e.venue || "")}${e.city ? ` · ${esc(e.city)}` : ""}${e.postcode ? ` · ${esc(e.postcode)}` : ""}<br>${esc(e.time || "")}${e.price ? ` · ${esc(e.price)}` : ""}</div>
     ${options.scoutPick && options.scoutIndex === 0 ? `<div class="scout-top-pick">🥇 Top Scout Pick</div>` : ""}
-    <div class="tags">${matchBadge(e)}${distance != null ? `<span class="tag distance-chip">📏 ~${esc(formatDistance(distance))} straight-line</span>` : ""}${options.scoutPick ? scoutBehaviourBadge(e) : ""}${e.region ? `<span class="tag">${esc(regionName(e.region))}</span>` : ""}</div>
+    <div class="tags">${matchBadge(e)}${distance != null ? `<span class="tag distance-chip">📏 ~${esc(formatDistance(distance))} straight-line</span>` : ""}${options.scoutPick ? scoutBehaviourBadge(e) + scoutTimingBadge(e) : ""}${e.region ? `<span class="tag">${esc(regionName(e.region))}</span>` : ""}</div>
     ${options.scoutPick ? scoutWhy(e) : ""}
     <div class="actions"><button type="button" class="secondary" onclick="openDetails(\'${escAttr(key)}\')">View details</button>
       <button class="${saved ? "secondary saved" : "secondary"}" onclick="toggleSave('${escAttr(key)}')">${saved ? "♥ Saved" : "♡ Save event"}</button>
