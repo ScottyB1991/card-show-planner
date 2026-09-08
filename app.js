@@ -621,8 +621,23 @@ function matchingCardInterests(e) {
 function matchBadge(e) {
   const matches = matchingCardInterests(e);
   if (!matches.length) return "";
-  const labels = matches.map(value => (CARD_CATEGORY_LABELS[value] || value).replace(/^\S+\s*/, ""));
-  return `<span class="tag preference-match">⚡ Matches you: ${esc(labels.join(", "))}</span>`;
+
+  const total = cardInterests.length;
+  const matched = matches.length;
+
+  let strength = "Matches you";
+
+  if (matched === total && total >= 2) {
+    strength = "Great match";
+  } else if (matched >= 2) {
+    strength = "Strong match";
+  }
+
+  const labels = matches.map(value =>
+    (CARD_CATEGORY_LABELS[value] || value).replace(/^\S+\s*/, "")
+  );
+
+  return `<span class="tag preference-match">⚡ ${strength} · ${matched}/${total}: ${esc(labels.join(", "))}</span>`;
 }
 
 function openDetails(key) {
