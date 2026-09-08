@@ -7,6 +7,7 @@ let supabaseClient = null;
 let savedIds = new Set();
 let savedStatuses = new Map();
 let savedNotes = new Map();
+let savedFavourites = new Map();
 let currentUser = null;
 let userLocation = null;
 let userPlace = localStorage.getItem("csp_user_place") || "";
@@ -149,16 +150,18 @@ async function loadSavedEvents() {
   savedIds = new Set();
   savedStatuses = new Map();
   savedNotes = new Map();
+  savedFavourites = new Map();
   currentUser = null;
   if (!supabaseClient) return;
   const { data: { user } } = await supabaseClient.auth.getUser();
   currentUser = user || null;
   if (!currentUser) return;
-  const { data, error } = await supabaseClient.from("saved_events").select("event_id,status,notes").eq("user_id", currentUser.id);
+  const { data, error } = await supabaseClient.from("saved_events").select("event_id,status,notes,favourite").eq("user_id", currentUser.id);
   if (error) { console.warn("Could not load saved events:", error); return; }
   savedIds = new Set((data || []).map(row => String(row.event_id)));
   savedStatuses = new Map((data || []).map(row => [String(row.event_id), row.status || "interested"]));
   savedNotes = new Map((data || []).map(row => [String(row.event_id), row.notes || ""]));
+  savedFavourites = new Map((data || []).map(row => [String(row.event_id), Boolean(row.favourite)]));
 }
 
 async function connectSupabase() {
@@ -565,12 +568,14 @@ async function toggleSave(key) {
     savedIds.delete(key);
     savedStatuses.delete(key);
     savedNotes.delete(key);
+    savedFavourites.delete(key);
   } else {
     const { error } = await supabaseClient.from("saved_events").insert({ event_id: e.id, user_id: authData.user.id, status: "interested" });
     if (error) return alert(error.message);
     savedIds.add(key);
     savedStatuses.set(key, "interested");
     savedNotes.set(key, "");
+    savedFavourites.set(key, false);
   }
   render();
   renderAccount();
@@ -678,6 +683,17 @@ function renderAccount() {
     }
   }
 
+  const favouriteShows = saved.filter(e => savedFavourites.get(eventKey(e)));
+  const favouriteCard = $("favouritesCard");
+  const favouriteContent = $("favouritesContent");
+  const favouriteCount = $("favouritesCount");
+  if (favouriteCard && favouriteContent && favouriteCount) {
+    favouriteCount.textContent = favouriteShows.length ? `${favouriteShows.length} favourite${favouriteShows.length === 1 ? "" : "s"}` : "";
+    favouriteContent.innerHTML = favouriteShows.length
+      ? favouriteShows.slice(0, 4).map(e => `<button type="button" class="favourite-item" onclick="openDetails('${escAttr(eventKey(e))}')"><span>⭐</span><span><strong>${esc(e.name || "Card show")}</strong><small>${formatDate(e.date)}${e.city ? ` · ${esc(e.city)}` : ""}</small></span><span>›</span></button>`).join("") + (favouriteShows.length > 4 ? `<div class="favourite-more">+${favouriteShows.length - 4} more</div>` : "")
+      : `<div class="favourite-empty">Tap <strong>☆ Add to favourites</strong> on a saved show to pin it here.</div>`;
+  }
+
   const statusCount = status => saved.filter(e => (savedStatuses.get(eventKey(e)) || "interested") === status).length;
   if (plannerStats) {
     plannerStats.innerHTML = `
@@ -760,6 +776,7 @@ function renderAccount() {
         }).join("")}
       </div>
       ${attendedLocked ? `<div class="status-hint">✅ Attended unlocks on the show date.</div>` : ""}
+      <button type="button" class="favourite-toggle${savedFavourites.get(key) ? " active" : ""}" onclick="toggleFavourite('${escAttr(key)}')" aria-pressed="${savedFavourites.get(key) ? "true" : "false"}">${savedFavourites.get(key) ? "⭐ Favourited" : "☆ Add to favourites"}</button>
       <details class="show-notes">
         <summary><span>📝 My Show Notes</span><span class="note-state">${note.trim() ? "Note saved" : "Add note"}</span></summary>
         <div class="show-notes-editor">
@@ -793,6 +810,24 @@ function renderAccount() {
     attended.length ? `<section class="show-history"><div class="history-head"><div class="history-title-row"><span class="history-kicker">✅ SHOW HISTORY</span><strong>${attended.length} attended</strong></div><div class="history-subtitle">🏆 Your card-show history</div></div>${attended.map(e => savedCard(e, true)).join("")}</section>` : "",
     pastUnattended.length ? `<details class="past-shows"><summary>Past saved shows · ${pastUnattended.length}</summary>${pastUnattended.map(e => savedCard(e, true)).join("")}</details>` : ""
   ].join("");
+}
+
+async function toggleFavourite(key) {
+  if (!currentUser || !supabaseClient || !savedIds.has(key)) return;
+  const e = currentEvents.find(x => eventKey(x) === key);
+  if (!e) return;
+  const next = !Boolean(savedFavourites.get(key));
+  savedFavourites.set(key, next);
+  renderAccount();
+  const { error } = await supabaseClient.from("saved_events")
+    .update({ favourite: next })
+    .eq("event_id", e.id)
+    .eq("user_id", currentUser.id);
+  if (error) {
+    savedFavourites.set(key, !next);
+    renderAccount();
+    alert("Could not update favourite — try again.");
+  }
 }
 
 async function setSavedStatus(key, status) {

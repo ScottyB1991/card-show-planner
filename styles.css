@@ -618,3 +618,14 @@ dialog.dialog-card{margin:auto;max-width:calc(100% - 18px)}
 .reminder-item:active{transform:translateY(1px)}.reminder-icon{font-size:18px}.reminder-copy{min-width:0}.reminder-copy strong{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px}.reminder-copy small{display:block;margin-top:3px;color:#aaaab4;font-size:10px;line-height:1.3}.reminder-arrow{color:#8f8f99;font-size:20px}
 .reminder-item.soon{border-color:#5a4d46}.reminder-item.today{border-color:#66606f}.reminder-more{padding:3px 4px 0;color:#9999a3;font-size:10px;text-align:right}
 @media(max-width:420px){.reminder-card{padding:11px}.reminder-item{padding:9px}.reminder-copy strong{font-size:11px}.reminder-copy small{font-size:9px}}
+
+
+/* Operation Gold Star */
+.favourite-toggle{width:100%;margin-top:9px;min-height:42px;border:1px solid #55535e;border-radius:12px;background:#111015;color:#c8c6cf;font-weight:800;font-size:15px}
+.favourite-toggle.active{background:#37343f;color:#fff;border-color:#777380}
+.favourites-card{margin-top:14px;padding:14px;border:1px solid #55535e;border-radius:16px;background:#0d0c11}
+.favourites-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+.favourites-head strong{font-size:18px}.favourites-head span{font-size:12px;color:#aaa7b1;font-weight:700}
+.favourites-content{display:grid;gap:8px}.favourite-empty{color:#c1bec7;line-height:1.45}
+.favourite-item{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;width:100%;padding:11px 12px;border:1px solid #55535e;border-radius:12px;background:#29272f;color:#fff;text-align:left}
+.favourite-item strong{display:block;font-size:14px}.favourite-item small{display:block;margin-top:2px;color:#b7b4bd;font-size:12px}.favourite-more{color:#aaa7b1;font-size:12px;padding:2px 4px}
