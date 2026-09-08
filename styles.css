@@ -592,3 +592,18 @@ body{overflow-x:hidden}
 .journey-map-title{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 11px;font-size:12px}.journey-map-title span{color:#9898a2;font-size:10px}
 .journey-map{height:245px;width:100%;border-top:1px solid #34343b}.journey-empty{padding:24px 16px 26px;border-top:1px solid #34343b;color:#9999a3;text-align:center;font-size:12px;line-height:1.45}
 @media(max-width:420px){.collector-journey{padding:11px;margin:12px 0 15px}.journey-stats{gap:6px}.journey-stat{padding:9px 4px}.journey-stat strong{font-size:17px}.journey-stat small{font-size:8px}.journey-map{height:220px}}
+
+/* The Card Map — mobile horizontal wobble guard */
+html,body{width:100%;max-width:100%;overflow-x:hidden}
+body{position:relative}
+main,.topbar{width:100%}
+dialog.dialog-card{margin:auto;max-width:calc(100% - 18px)}
+.dialog-card,.account-card,.card,.event,.saved-event,.next-show-card,.collector-journey,.show-notes,.journey-map-wrap{min-width:0}
+.dialog-card *,.account-card *{max-width:100%}
+@media(max-width:640px){
+  main{padding-left:12px;padding-right:12px}
+  .topbar{padding-left:12px;padding-right:12px}
+  dialog.dialog-card,.dialog-card,.account-card{width:calc(100% - 18px);max-width:calc(100% - 18px);margin-left:auto;margin-right:auto}
+  .account-summary,.next-show-card,.saved-event,.collector-journey,.show-notes{width:100%;max-width:100%;margin-left:auto;margin-right:auto}
+  input,select,textarea,button,a{min-width:0}
+}
