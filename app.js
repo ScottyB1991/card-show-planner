@@ -650,6 +650,29 @@ function scoutMatchRank(e) {
   return 100 + matched;
 }
 
+function scoutBehaviourScore(e) {
+  // Behaviour is deliberately a light supporting signal. Only categories that
+  // already match explicit Card Preferences can contribute. Attended is not
+  // used in v19 while we gather more real-world history.
+  const matches = matchingCardInterests(e);
+  if (!matches.length) return 0;
+
+  const saved = currentEvents.filter(show => savedIds.has(eventKey(show)));
+  const profile = buildScoutBehaviourProfile(saved);
+
+  return matches.reduce((score, category) => {
+    const counts = profile.categories[category];
+    if (!counts) return score;
+    return score + counts.saved + (counts.favourite * 3) + (counts.going * 4);
+  }, 0);
+}
+
+function scoutBehaviourBadge(e) {
+  const score = scoutBehaviourScore(e);
+  if (!score) return "";
+  return `<span class="tag scout-boost">🧭 Scout boost · activity matches</span>`;
+}
+
 function renderScoutPicks(today) {
   const section = $("scoutPicksSection");
   const list = $("scoutPicksList");
@@ -672,18 +695,27 @@ function renderScoutPicks(today) {
       const rankDiff = scoutMatchRank(b) - scoutMatchRank(a);
       if (rankDiff) return rankDiff;
 
-      // For equally strong matches, prefer the nearer show when
-      // the collector has set a location. Unknown distances stay last.
+      // Distance remains the next strongest signal. We compare broad 25-mile
+      // bands first, then let behaviour gently break ties inside the same band.
+      // Exact distance still settles any remaining tie.
+      let da = null;
+      let db = null;
       if (userLocation) {
-        const da = eventDistanceMiles(a);
-        const db = eventDistanceMiles(b);
+        da = eventDistanceMiles(a);
+        db = eventDistanceMiles(b);
         if (da != null || db != null) {
           if (da == null) return 1;
           if (db == null) return -1;
-          if (da !== db) return da - db;
+          const bandA = Math.floor(da / 25);
+          const bandB = Math.floor(db / 25);
+          if (bandA !== bandB) return bandA - bandB;
         }
       }
 
+      const behaviourDiff = scoutBehaviourScore(b) - scoutBehaviourScore(a);
+      if (behaviourDiff) return behaviourDiff;
+
+      if (da != null && db != null && da !== db) return da - db;
       return String(a.date || "").localeCompare(String(b.date || ""));
     })
     .slice(0, 3);
@@ -696,9 +728,9 @@ function renderScoutPicks(today) {
 
   section.hidden = false;
   if (hint) hint.textContent = userLocation
-    ? `Top ${picks.length} based on your saved card preferences, with distance breaking ties.`
-    : `Top ${picks.length} based on your saved card preferences.`;
-  list.innerHTML = picks.map(eventCard).join("");
+    ? `Top ${picks.length} based on your card preferences, distance and light activity signals.`
+    : `Top ${picks.length} based on your card preferences, with light activity signals.`;
+  list.innerHTML = picks.map(e => eventCard(e, { scoutPick: true })).join("");
 }
 
 function openDetails(key) {
@@ -751,7 +783,7 @@ function openDetails(key) {
   }
 }
 
-function eventCard(e) {
+function eventCard(e, options = {}) {
   const key = eventKey(e);
   const saved = savedIds.has(key);
   const rawUrl = e.ticket_url || e.source_url || "";
@@ -764,7 +796,7 @@ function eventCard(e) {
       <span class="tag">${esc(e.pokemon_relevance || "Card show")}</span>
     </div>
     <div class="meta">${esc(e.venue || "")}${e.city ? ` · ${esc(e.city)}` : ""}${e.postcode ? ` · ${esc(e.postcode)}` : ""}<br>${esc(e.time || "")}${e.price ? ` · ${esc(e.price)}` : ""}</div>
-    <div class="tags">${matchBadge(e)}${distance != null ? `<span class="tag distance-chip">📏 ~${esc(formatDistance(distance))} straight-line</span>` : ""}${e.region ? `<span class="tag">${esc(regionName(e.region))}</span>` : ""}</div>
+    <div class="tags">${matchBadge(e)}${distance != null ? `<span class="tag distance-chip">📏 ~${esc(formatDistance(distance))} straight-line</span>` : ""}${options.scoutPick ? scoutBehaviourBadge(e) : ""}${e.region ? `<span class="tag">${esc(regionName(e.region))}</span>` : ""}</div>
     <div class="actions"><button type="button" class="secondary" onclick="openDetails(\'${escAttr(key)}\')">View details</button>
       <button class="${saved ? "secondary saved" : "secondary"}" onclick="toggleSave('${escAttr(key)}')">${saved ? "♥ Saved" : "♡ Save event"}</button>
       ${url !== "#" ? `<a class="primary" href="${escAttr(url)}" target="_blank" rel="noopener">Website / tickets ↗</a>` : ""}
