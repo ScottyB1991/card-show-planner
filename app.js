@@ -144,8 +144,16 @@ function config() {
 }
 
 async function loadDemoEvents() {
-  const res = await fetch(EVENTS_FILE);
-  demoEvents = await res.json();
+  try {
+    const res = await fetch(EVENTS_FILE);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    demoEvents = await res.json();
+  } catch (error) {
+    // Demo data is only a fallback. A missing events.json must never stop
+    // the live Supabase event feed from loading.
+    console.warn("Demo events unavailable:", error);
+    demoEvents = [];
+  }
 }
 
 async function loadSavedEvents() {
@@ -275,7 +283,7 @@ async function connectSupabase() {
     await loadSavedEvents();
     await loadCardPreferences();
     updateAuthUI();
-    $("connectionBadge").textContent = "Supabase connected";
+    $("connectionBadge").textContent = `Supabase connected · ${currentEvents.length} shows`;
     return true;
   } catch (e) {
     console.warn("Supabase connection failed:", e);
@@ -1180,6 +1188,7 @@ if (userPlace) {
 }
 
 async function init() {
+  // Demo data is optional fallback data; Supabase remains the live source.
   await loadDemoEvents();
   const connected = await connectSupabase();
   if (!connected) {
