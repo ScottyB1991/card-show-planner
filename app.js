@@ -8,6 +8,7 @@ let savedIds = new Set();
 let savedStatuses = new Map();
 let savedNotes = new Map();
 let savedFavourites = new Map();
+let cardInterests = [];
 let currentUser = null;
 let userLocation = null;
 let userPlace = localStorage.getItem("csp_user_place") || "";
@@ -164,6 +165,65 @@ async function loadSavedEvents() {
   savedFavourites = new Map((data || []).map(row => [String(row.event_id), Boolean(row.favourite)]));
 }
 
+const CARD_INTEREST_OPTIONS = [
+  ["pokemon", "⚡ Pokémon"],
+  ["sports", "🏆 Sports"],
+  ["one-piece", "🏴‍☠️ One Piece"],
+  ["mtg", "🧙 MTG"],
+  ["yugioh", "🐉 Yu-Gi-Oh!"],
+  ["lorcana", "✨ Lorcana"]
+];
+
+async function loadCardPreferences() {
+  cardInterests = [];
+  if (!supabaseClient || !currentUser) return;
+  const { data, error } = await supabaseClient.from("user_preferences")
+    .select("card_interests")
+    .eq("user_id", currentUser.id)
+    .maybeSingle();
+  if (error) { console.warn("Could not load card preferences:", error); return; }
+  cardInterests = Array.isArray(data?.card_interests) ? data.card_interests : [];
+}
+
+function renderCardPreferences() {
+  const wrap = $("preferencesChoices");
+  const count = $("preferencesCount");
+  if (!wrap) return;
+  const selected = new Set(cardInterests);
+  wrap.innerHTML = CARD_INTEREST_OPTIONS.map(([value, label]) => `
+    <label class="preference-chip ${selected.has(value) ? "selected" : ""}">
+      <input type="checkbox" value="${escAttr(value)}" ${selected.has(value) ? "checked" : ""}>
+      <span>${esc(label)}</span>
+    </label>`).join("");
+  if (count) count.textContent = cardInterests.length ? `${cardInterests.length} selected` : "Pick yours";
+  wrap.querySelectorAll("input").forEach(input => input.addEventListener("change", () => {
+    input.closest(".preference-chip")?.classList.toggle("selected", input.checked);
+    const n = wrap.querySelectorAll("input:checked").length;
+    if (count) count.textContent = n ? `${n} selected` : "Pick yours";
+  }));
+}
+
+async function saveCardPreferences() {
+  const wrap = $("preferencesChoices");
+  const status = $("preferencesStatus");
+  if (!supabaseClient || !currentUser || !wrap) return;
+  const interests = [...wrap.querySelectorAll("input:checked")].map(input => input.value);
+  if (status) status.textContent = "Saving…";
+  const { error } = await supabaseClient.from("user_preferences").upsert({
+    user_id: currentUser.id,
+    card_interests: interests,
+    updated_at: new Date().toISOString()
+  }, { onConflict: "user_id" });
+  if (error) {
+    console.warn("Could not save card preferences:", error);
+    if (status) status.textContent = "Couldn’t save — try again.";
+    return;
+  }
+  cardInterests = interests;
+  renderCardPreferences();
+  if (status) { status.textContent = "✓ Saved"; setTimeout(() => { if (status.textContent === "✓ Saved") status.textContent = ""; }, 2200); }
+}
+
 async function connectSupabase() {
   const c = config();
   if (!c.url || !c.key || !window.supabase) return false;
@@ -182,6 +242,7 @@ async function connectSupabase() {
       pokemon_relevance: e.pokemon_relevance || "Card show"
     }));
     await loadSavedEvents();
+    await loadCardPreferences();
     updateAuthUI();
     $("connectionBadge").textContent = "Supabase connected";
     return true;
@@ -649,6 +710,7 @@ function renderAccount() {
   const reminderCount = $("reminderCount");
   if (!email || !list || !count) return;
   email.textContent = currentUser?.email || "Signed in";
+  renderCardPreferences();
 
   const saved = currentEvents
     .filter(e => savedIds.has(eventKey(e)))
@@ -1053,6 +1115,7 @@ async function init() {
     supabaseClient.auth.onAuthStateChange(async (_event, session) => {
       currentUser = session?.user || null;
       await loadSavedEvents();
+      await loadCardPreferences();
       updateAuthUI();
       render();
       renderAccount();
@@ -1075,6 +1138,7 @@ $("authBtn").addEventListener("click", async () => {
   updateAuthUI();
   if (currentUser) {
     await loadSavedEvents();
+    await loadCardPreferences();
     renderAccount();
     $("accountDialog").showModal();
   } else {
@@ -1106,6 +1170,9 @@ $("clearConfig").addEventListener("click", () => {
   localStorage.removeItem("csp_supabase_key");
   location.reload();
 });
+
+const savePreferencesBtn = $("savePreferencesBtn");
+if (savePreferencesBtn) savePreferencesBtn.addEventListener("click", saveCardPreferences);
 
 init();
 
