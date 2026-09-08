@@ -1,4 +1,7 @@
 const PROJECT_URL_DEFAULT = "https://fafkcpkhwjopelvkupwe.supabase.co";
+// PUBLIC browser key only. Paste your Supabase publishable key here before deploying v23.
+// Never use a secret/service-role key in frontend code.
+const PROJECT_PUBLISHABLE_KEY = "PASTE_YOUR_SUPABASE_PUBLISHABLE_KEY_HERE";
 const EVENTS_FILE = "events.json";
 
 let demoEvents = [];
@@ -137,9 +140,12 @@ function formatDistance(miles) {
 
 
 function config() {
+  const storedUrl = localStorage.getItem("csp_supabase_url") || "";
+  const storedKey = localStorage.getItem("csp_supabase_key") || "";
+  const bundledKey = PROJECT_PUBLISHABLE_KEY.startsWith("PASTE_") ? "" : PROJECT_PUBLISHABLE_KEY;
   return {
-    url: localStorage.getItem("csp_supabase_url") || "",
-    key: localStorage.getItem("csp_supabase_key") || ""
+    url: storedUrl || PROJECT_URL_DEFAULT,
+    key: storedKey || bundledKey
   };
 }
 
@@ -869,8 +875,8 @@ function eventCard(e, options = {}) {
 
 async function toggleSave(key) {
   if (!supabaseClient) {
-    alert("Connect Supabase first to save events.");
-    $("settingsDialog").showModal();
+    showAuthMessage("Account services are temporarily unavailable. Please try again later.");
+    $("authDialog").showModal();
     return;
   }
   const { data: authData } = await supabaseClient.auth.getUser();
@@ -1382,7 +1388,7 @@ function clearLocation() {
 }
 
 async function signInOrSignUp(mode) {
-  if (!supabaseClient) return showAuthMessage("Connect Supabase first in Settings.");
+  if (!supabaseClient) return showAuthMessage("Account services are temporarily unavailable. Please try again later.");
   const email = $("authEmail").value.trim();
   const password = $("authPassword").value;
   if (!email || !password) return showAuthMessage("Enter your email and password.");
