@@ -683,7 +683,9 @@ function renderAccount() {
     }
   }
 
-  const favouriteShows = saved.filter(e => savedFavourites.get(eventKey(e)));
+  const favouriteShows = saved
+    .filter(e => savedFavourites.get(eventKey(e)))
+    .sort((a, b) => String(a.date || "9999-12-31").localeCompare(String(b.date || "9999-12-31")));
   const favouriteCard = $("favouritesCard");
   const favouriteContent = $("favouritesContent");
   const favouriteCount = $("favouritesCount");
@@ -691,7 +693,7 @@ function renderAccount() {
     favouriteCount.textContent = favouriteShows.length ? `${favouriteShows.length} favourite${favouriteShows.length === 1 ? "" : "s"}` : "";
     favouriteContent.innerHTML = favouriteShows.length
       ? favouriteShows.slice(0, 4).map(e => `<button type="button" class="favourite-item" onclick="openDetails('${escAttr(eventKey(e))}')"><span>⭐</span><span><strong>${esc(e.name || "Card show")}</strong><small>${formatDate(e.date)}${e.city ? ` · ${esc(e.city)}` : ""}</small></span><span>›</span></button>`).join("") + (favouriteShows.length > 4 ? `<div class="favourite-more">+${favouriteShows.length - 4} more</div>` : "")
-      : `<div class="favourite-empty">Tap <strong>☆ Add to favourites</strong> on a saved show to pin it here.</div>`;
+      : `<div class="favourite-empty">Star the shows you’re most excited for. They’ll live here. ⭐</div>`;
   }
 
   const statusCount = status => saved.filter(e => (savedStatuses.get(eventKey(e)) || "interested") === status).length;
@@ -763,7 +765,7 @@ function renderAccount() {
     const eventDay = e.date ? new Date(e.date + "T00:00:00") : null;
     const attendedLocked = Boolean(eventDay && eventDay > today);
     return `<article class="saved-event${isPast ? " saved-past" : ""}">
-      <div class="saved-title">${esc(e.name || "Card show")}</div>
+      <div class="saved-title">${savedFavourites.get(key) ? `<span class="saved-favourite-star" aria-label="Favourite">⭐</span>` : ""}${esc(e.name || "Card show")}</div>
       <div class="saved-meta">${formatDate(e.date)}${e.city ? ` · ${esc(e.city)}` : ""}${e.venue ? ` · ${esc(e.venue)}` : ""}</div>
       <div class="show-status-picker" role="group" aria-label="Show status">
         ${[

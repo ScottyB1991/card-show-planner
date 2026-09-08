@@ -780,3 +780,9 @@ dialog.dialog-card{margin:auto;max-width:calc(100% - 18px)}
     padding:16px !important;
   }
 }
+
+/* Operation Gold Star v2 — favourites become a first-class planner section */
+.saved-section > .favourites-card{margin:14px 0 18px}
+.saved-favourite-star{display:inline-block;margin-right:7px;font-size:.82em;vertical-align:.08em}
+.favourite-empty{padding:10px 4px;text-align:center;color:#aaa7b1}
+@media(max-width:420px){.favourites-head strong{font-size:16px}.favourite-item{padding:10px}.favourite-item strong{font-size:13px}}
