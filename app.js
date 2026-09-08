@@ -209,14 +209,42 @@ async function saveCardPreferences() {
   if (!supabaseClient || !currentUser || !wrap) return;
   const interests = [...wrap.querySelectorAll("input:checked")].map(input => input.value);
   if (status) status.textContent = "Saving…";
-  const { error } = await supabaseClient.from("user_preferences").upsert({
-    user_id: currentUser.id,
+  const payload = {
     card_interests: interests,
     updated_at: new Date().toISOString()
-  }, { onConflict: "user_id" });
+  };
+
+  // Avoid an UPSERT here: under RLS, INSERT ... ON CONFLICT DO UPDATE can
+  // be rejected even when the separate INSERT/UPDATE policies are correct.
+  // First check whether this collector already has a preferences row, then
+  // perform the matching operation explicitly.
+  const { data: existing, error: lookupError } = await supabaseClient
+    .from("user_preferences")
+    .select("user_id")
+    .eq("user_id", currentUser.id)
+    .maybeSingle();
+
+  if (lookupError) {
+    console.warn("Could not check card preferences:", lookupError);
+    if (status) status.textContent = `Couldn’t save — ${lookupError.message || "try again."}`;
+    return;
+  }
+
+  let error;
+  if (existing) {
+    ({ error } = await supabaseClient
+      .from("user_preferences")
+      .update(payload)
+      .eq("user_id", currentUser.id));
+  } else {
+    ({ error } = await supabaseClient
+      .from("user_preferences")
+      .insert({ user_id: currentUser.id, ...payload }));
+  }
+
   if (error) {
     console.warn("Could not save card preferences:", error);
-    if (status) status.textContent = "Couldn’t save — try again.";
+    if (status) status.textContent = `Couldn’t save — ${error.message || "try again."}`;
     return;
   }
   cardInterests = interests;
