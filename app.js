@@ -459,6 +459,7 @@ function render() {
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  renderScoutPicks(today);
   let filtered = currentEvents.filter(e => {
     const hay = [e.name,e.city,e.venue,e.postcode,e.region].join(" ").toLowerCase();
     const eventDate = e.date ? new Date(e.date + "T00:00:00") : null;
@@ -638,6 +639,51 @@ function matchBadge(e) {
   );
 
   return `<span class="tag preference-match">⚡ ${strength} · ${matched}/${total}: ${esc(labels.join(", "))}</span>`;
+}
+
+function scoutMatchRank(e) {
+  const matched = matchingCardInterests(e).length;
+  const total = cardInterests.length;
+  if (!matched || !total) return 0;
+  if (matched === total && total >= 2) return 300 + matched;
+  if (matched >= 2) return 200 + matched;
+  return 100 + matched;
+}
+
+function renderScoutPicks(today) {
+  const section = $("scoutPicksSection");
+  const list = $("scoutPicksList");
+  const hint = $("scoutPicksHint");
+  if (!section || !list) return;
+
+  if (!currentUser || !cardInterests.length) {
+    section.hidden = true;
+    list.innerHTML = "";
+    return;
+  }
+
+  const picks = currentEvents
+    .filter(e => {
+      if (!e.date || !matchingCardInterests(e).length) return false;
+      const eventDate = new Date(e.date + "T00:00:00");
+      return !Number.isNaN(eventDate.getTime()) && eventDate >= today;
+    })
+    .sort((a, b) => {
+      const rankDiff = scoutMatchRank(b) - scoutMatchRank(a);
+      if (rankDiff) return rankDiff;
+      return String(a.date || "").localeCompare(String(b.date || ""));
+    })
+    .slice(0, 3);
+
+  if (!picks.length) {
+    section.hidden = true;
+    list.innerHTML = "";
+    return;
+  }
+
+  section.hidden = false;
+  if (hint) hint.textContent = `Top ${picks.length} based on your saved card preferences.`;
+  list.innerHTML = picks.map(eventCard).join("");
 }
 
 function openDetails(key) {

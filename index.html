@@ -70,6 +70,18 @@
             <p id="locationStatus" class="status"></p>
     </section>
 
+
+    <section id="scoutPicksSection" class="scout-picks-section" hidden>
+      <div class="section-head scout-picks-head">
+        <div>
+          <div class="eyebrow">Your CardShow Scout</div>
+          <h2>⚡ Scout Picks</h2>
+          <span id="scoutPicksHint" class="muted">Top matches based on your saved card preferences.</span>
+        </div>
+      </div>
+      <div id="scoutPicksList" class="events scout-picks-list"></div>
+    </section>
+
     <section>
       <div class="section-head shows-head">
         <h2>Upcoming shows</h2>
@@ -182,7 +194,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
   <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
-  <script src="app.js?v=15"></script>
+  <script src="app.js?v=16"></script>
 
 <dialog id="detailsDialog" class="modal">
   <div class="modal-card details-card">
