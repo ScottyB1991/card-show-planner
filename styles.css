@@ -802,3 +802,8 @@ dialog.dialog-card{margin:auto;max-width:calc(100% - 18px)}
 .preferences-actions{display:flex;align-items:center;gap:12px;margin-top:15px;flex-wrap:wrap}
 .preferences-actions .primary{margin:0}.preferences-status{color:#aaa7b1;font-weight:700;font-size:13px}
 @media(max-width:420px){.preferences-card{padding:15px}.preferences-head strong{font-size:17px}.preference-chip span{padding:9px 11px;font-size:13px}}
+
+
+/* Card Preferences Phase 2 — verified show matching */
+.preference-match{border-color:#8d8996;background:#302d38;color:#fff;font-weight:800}
+.details-match{margin:12px 0 4px}.details-match .preference-match{display:inline-flex}

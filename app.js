@@ -168,7 +168,7 @@ async function loadSavedEvents() {
 const CARD_INTEREST_OPTIONS = [
   ["pokemon", "⚡ Pokémon"],
   ["sports", "🏆 Sports"],
-  ["one-piece", "🏴‍☠️ One Piece"],
+  ["one_piece", "🏴‍☠️ One Piece"],
   ["mtg", "🧙 MTG"],
   ["yugioh", "🐉 Yu-Gi-Oh!"],
   ["lorcana", "✨ Lorcana"]
@@ -267,7 +267,8 @@ async function connectSupabase() {
       region: e.region || "",
       ticket_url: e.ticket_url || e.website || "",
       source_url: e.source_url || e.website || "",
-      pokemon_relevance: e.pokemon_relevance || "Card show"
+      pokemon_relevance: e.pokemon_relevance || "Card show",
+      card_categories: Array.isArray(e.card_categories) ? e.card_categories : []
     }));
     await loadSavedEvents();
     await loadCardPreferences();
@@ -568,6 +569,25 @@ async function shareShow(key) {
   }
 }
 
+const CARD_CATEGORY_LABELS = Object.fromEntries(CARD_INTEREST_OPTIONS);
+
+function normaliseCardCategory(value) {
+  return String(value || "").trim().toLowerCase().replace(/-/g, "_");
+}
+
+function matchingCardInterests(e) {
+  if (!currentUser || !cardInterests.length) return [];
+  const categories = new Set((Array.isArray(e.card_categories) ? e.card_categories : []).map(normaliseCardCategory));
+  return cardInterests.map(normaliseCardCategory).filter(value => categories.has(value));
+}
+
+function matchBadge(e) {
+  const matches = matchingCardInterests(e);
+  if (!matches.length) return "";
+  const labels = matches.map(value => (CARD_CATEGORY_LABELS[value] || value).replace(/^\S+\s*/, ""));
+  return `<span class="tag preference-match">⚡ Matches you: ${esc(labels.join(", "))}</span>`;
+}
+
 function openDetails(key) {
   const e = currentEvents.find(x => eventKey(x) === key);
   if (!e) return;
@@ -595,6 +615,7 @@ function openDetails(key) {
         ${e.postcode ? `<div>📮 ${esc(e.postcode)}</div>` : ""}
         ${distance != null ? `<div>📍 <strong>Approx. ${esc(formatDistance(distance))} away</strong></div>` : ""}
       </div>
+      ${matchBadge(e) ? `<div class="details-match">${matchBadge(e)}</div>` : ""}
       ${e.description ? `<div class="details-description">${esc(e.description)}</div>` : ""}
       <div class="details-actions">
         <button class="primary" data-save-detail="${escAttr(key)}">${saved ? "♥ Saved to My Card Map" : "♡ Save event"}</button>
@@ -630,7 +651,7 @@ function eventCard(e) {
       <span class="tag">${esc(e.pokemon_relevance || "Card show")}</span>
     </div>
     <div class="meta">${esc(e.venue || "")}${e.city ? ` · ${esc(e.city)}` : ""}${e.postcode ? ` · ${esc(e.postcode)}` : ""}<br>${esc(e.time || "")}${e.price ? ` · ${esc(e.price)}` : ""}</div>
-    <div class="tags">${distance != null ? `<span class="tag distance-chip">📏 ~${esc(formatDistance(distance))} straight-line</span>` : ""}${e.region ? `<span class="tag">${esc(regionName(e.region))}</span>` : ""}</div>
+    <div class="tags">${matchBadge(e)}${distance != null ? `<span class="tag distance-chip">📏 ~${esc(formatDistance(distance))} straight-line</span>` : ""}${e.region ? `<span class="tag">${esc(regionName(e.region))}</span>` : ""}</div>
     <div class="actions"><button type="button" class="secondary" onclick="openDetails(\'${escAttr(key)}\')">View details</button>
       <button class="${saved ? "secondary saved" : "secondary"}" onclick="toggleSave('${escAttr(key)}')">${saved ? "♥ Saved" : "♡ Save event"}</button>
       ${url !== "#" ? `<a class="primary" href="${escAttr(url)}" target="_blank" rel="noopener">Website / tickets ↗</a>` : ""}
