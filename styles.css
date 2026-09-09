@@ -1302,3 +1302,18 @@ html[data-theme="dark"] .feature-ribbon span{
 @media (max-width:380px){
   .feature-ribbon span{font-size:.71rem}
 }
+
+
+/* THE CARD MAP v28.2 — dedicated mobile hero asset */
+.brand-banner picture{
+  display:block;
+}
+@media (max-width:720px){
+  .brand-banner img{
+    width:100%;
+    height:auto;
+    aspect-ratio:1158 / 388;
+    object-fit:cover;
+    object-position:center;
+  }
+}
