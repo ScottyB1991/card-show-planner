@@ -1108,3 +1108,87 @@ html[data-theme="dark"] dialog::backdrop{
   }
 }
 
+/* =========================================================
+   THE CARD MAP v27 — optional verified show artwork
+   Applied only when an event has a non-empty image_url.
+   ========================================================= */
+.event.has-show-artwork,
+.saved-event.has-show-artwork,
+.next-show-card.has-show-artwork{
+  position:relative;
+  overflow:hidden;
+  isolation:isolate;
+  background:#17181e;
+  color:#fff;
+  min-height:190px;
+}
+.event.has-show-artwork::before,
+.saved-event.has-show-artwork::before,
+.next-show-card.has-show-artwork::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:-2;
+  background-image:var(--show-artwork);
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+  transform:scale(1.01);
+}
+.event.has-show-artwork::after,
+.saved-event.has-show-artwork::after,
+.next-show-card.has-show-artwork::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+  background:
+    linear-gradient(180deg, rgba(7,8,12,.30) 0%, rgba(7,8,12,.72) 46%, rgba(7,8,12,.96) 100%);
+}
+.event.has-show-artwork,
+.event.has-show-artwork h3,
+.event.has-show-artwork .meta,
+.event.has-show-artwork .muted,
+.saved-event.has-show-artwork,
+.saved-event.has-show-artwork .saved-meta,
+.next-show-card.has-show-artwork,
+.next-show-card.has-show-artwork .next-show-meta{
+  color:#fff;
+  text-shadow:0 1px 2px rgba(0,0,0,.72);
+}
+.event.has-show-artwork .tag,
+.event.has-show-artwork .badge,
+.event.has-show-artwork .distance-chip,
+.saved-event.has-show-artwork .tag,
+.next-show-card.has-show-artwork .tag{
+  text-shadow:none;
+  backdrop-filter:blur(7px);
+  -webkit-backdrop-filter:blur(7px);
+}
+.event.has-show-artwork button,
+.saved-event.has-show-artwork button,
+.next-show-card.has-show-artwork button{
+  position:relative;
+  z-index:2;
+}
+@media (hover:hover){
+  .event.has-show-artwork::before,
+  .saved-event.has-show-artwork::before,
+  .next-show-card.has-show-artwork::before{
+    transition:transform .25s ease;
+  }
+  .event.has-show-artwork:hover::before,
+  .saved-event.has-show-artwork:hover::before,
+  .next-show-card.has-show-artwork:hover::before{
+    transform:scale(1.035);
+  }
+}
+@media (prefers-reduced-motion:reduce){
+  .event.has-show-artwork::before,
+  .saved-event.has-show-artwork::before,
+  .next-show-card.has-show-artwork::before{
+    transition:none;
+  }
+}
+
