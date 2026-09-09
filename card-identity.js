@@ -3,10 +3,10 @@
   "use strict";
   const tidy = s => String(s || "").replace(/\s+/g," ").trim();
   function findEvent(card){
-    if(!Array.isArray(window.currentEvents)) return null;
+    if(typeof currentEvents === "undefined" || !Array.isArray(currentEvents)) return null;
     const html=card.outerHTML||"", text=tidy(card.textContent).toLowerCase();
-    for(const e of window.currentEvents){try{const k=String(eventKey(e));if(k&&html.includes(k))return e}catch(_){}}
-    return window.currentEvents.find(e=>{const n=tidy(e&&e.name).toLowerCase();return n&&text.includes(n)})||null;
+    for(const e of currentEvents{try{const k=String(eventKey(e));if(k&&html.includes(k))return e}catch(_){}}
+    return currentEvents.find(e=>{const n=tidy(e&&e.name).toLowerCase();return n&&text.includes(n)})||null;
   }
   function fmtDate(v){
     if(!v)return "";
