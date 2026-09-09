@@ -1211,3 +1211,50 @@ text-transform:uppercase;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(
 html[data-theme="dark"] .event::before{opacity:.72}
 html[data-theme="dark"] .event .tcm-card-stamp{background:rgba(16,18,26,.72);border-color:rgba(255,255,255,.12);color:#fff}
 @media(max-width:640px){.event::after{width:3px}.event .tcm-card-stamp{margin-bottom:6px;padding:3px 7px;font-size:.66rem}}
+
+
+/* =========================================================
+   THE CARD MAP v28 — responsive brand hero banner
+   ========================================================= */
+.brand-banner{
+  width:100%;
+  margin:0 0 18px;
+  overflow:hidden;
+  border:1px solid rgba(120,124,140,.32);
+  border-radius:24px;
+  background:#080a0f;
+  box-shadow:0 16px 42px rgba(0,0,0,.16);
+}
+.brand-banner img{
+  display:block;
+  width:100%;
+  height:auto;
+  aspect-ratio:1978 / 736;
+  object-fit:cover;
+  object-position:center;
+}
+html[data-theme="dark"] .brand-banner{
+  border-color:rgba(255,255,255,.18);
+  box-shadow:0 18px 48px rgba(0,0,0,.34);
+}
+@media (max-width:720px){
+  .brand-banner{
+    margin-bottom:14px;
+    border-radius:18px;
+  }
+  .brand-banner img{
+    height:180px;
+    width:100%;
+    object-fit:cover;
+    object-position:50% 50%;
+  }
+}
+@media (max-width:430px){
+  .brand-banner img{
+    height:156px;
+    object-position:50% 50%;
+  }
+}
+@media (prefers-reduced-motion:reduce){
+  .brand-banner{scroll-behavior:auto}
+}
