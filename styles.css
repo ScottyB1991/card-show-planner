@@ -1192,3 +1192,22 @@ html[data-theme="dark"] dialog::backdrop{
   }
 }
 
+
+/* v27 Card Map Identity Polish — original visual treatment, no third-party artwork */
+.event{position:relative;overflow:hidden;isolation:isolate}
+.event::before{content:"";position:absolute;inset:0;z-index:-2;pointer-events:none;opacity:.55;
+background:radial-gradient(circle at 88% 18%,rgba(77,94,255,.12) 0 2px,transparent 3px),
+linear-gradient(135deg,transparent 0 67%,rgba(77,94,255,.055) 67% 68%,transparent 68% 100%);
+background-size:auto,32px 32px}
+.event::after{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;z-index:3;pointer-events:none;
+background:linear-gradient(180deg,#ef3340 0 34%,#fff 34% 66%,#111827 66% 100%);opacity:.9}
+.event .tcm-card-stamp{display:flex;align-items:center;gap:7px;width:max-content;max-width:100%;
+margin:0 0 8px;padding:4px 8px;border:1px solid rgba(77,94,255,.16);border-radius:999px;
+background:rgba(255,255,255,.72);font-size:.72rem;font-weight:800;letter-spacing:.04em;
+text-transform:uppercase;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.event .tcm-card-stamp .tcm-date{font-weight:900}
+.event .tcm-card-stamp .tcm-sep{opacity:.45}
+.event.tcm-scout-card{box-shadow:0 10px 30px rgba(38,45,90,.10)}
+html[data-theme="dark"] .event::before{opacity:.72}
+html[data-theme="dark"] .event .tcm-card-stamp{background:rgba(16,18,26,.72);border-color:rgba(255,255,255,.12);color:#fff}
+@media(max-width:640px){.event::after{width:3px}.event .tcm-card-stamp{margin-bottom:6px;padding:3px 7px;font-size:.66rem}}
