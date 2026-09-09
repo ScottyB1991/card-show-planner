@@ -984,3 +984,127 @@ dialog::backdrop{backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
   html{scroll-behavior:auto}
   *,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}
 }
+
+/* =========================================================
+   THE CARD MAP v26 — tester feedback polish
+   Optional dark mode. Default remains the existing light mode.
+   ========================================================= */
+.theme-toggle{
+  white-space:nowrap;
+}
+html[data-theme="dark"]{
+  color-scheme:dark;
+}
+html[data-theme="dark"] body{
+  background:#0d0e12;
+  color:#f2f3f6;
+}
+html[data-theme="dark"] .hero,
+html[data-theme="dark"] .card,
+html[data-theme="dark"] .event,
+html[data-theme="dark"] .saved-event,
+html[data-theme="dark"] .next-show-card,
+html[data-theme="dark"] .dialog-card,
+html[data-theme="dark"] dialog{
+  background:#17181e;
+  color:#f2f3f6;
+  border-color:#30323b;
+}
+html[data-theme="dark"] .account-summary,
+html[data-theme="dark"] .future-card,
+html[data-theme="dark"] .empty,
+html[data-theme="dark"] .empty-saved{
+  background:#13141a;
+  color:#e8e9ed;
+  border-color:#30323b;
+}
+html[data-theme="dark"] .account-avatar{
+  background:#202129;
+  border-color:#383a44;
+}
+html[data-theme="dark"] .eyebrow,
+html[data-theme="dark"] .muted,
+html[data-theme="dark"] .meta,
+html[data-theme="dark"] .status,
+html[data-theme="dark"] .section-head span,
+html[data-theme="dark"] .hero p,
+html[data-theme="dark"] .saved-event .saved-meta,
+html[data-theme="dark"] .future-card span,
+html[data-theme="dark"] .next-show-meta,
+html[data-theme="dark"] .saved-group-label,
+html[data-theme="dark"] label span,
+html[data-theme="dark"] .location-or{
+  color:#b7bac4;
+}
+html[data-theme="dark"] input,
+html[data-theme="dark"] select{
+  background:#111217;
+  color:#f2f3f6;
+  border-color:#3a3c46;
+}
+html[data-theme="dark"] input::placeholder{
+  color:#8f929d;
+}
+html[data-theme="dark"] input:focus,
+html[data-theme="dark"] select:focus{
+  border-color:#777b89;
+}
+html[data-theme="dark"] .small-btn,
+html[data-theme="dark"] .secondary,
+html[data-theme="dark"] .view-btn{
+  background:#24262e;
+  color:#f2f3f6;
+  border-color:#3a3c46;
+}
+html[data-theme="dark"] .primary{
+  background:#f1f2f5;
+  color:#121318;
+}
+html[data-theme="dark"] .badge,
+html[data-theme="dark"] .tag{
+  background:#262832;
+  color:#eceef3;
+}
+html[data-theme="dark"] .saved{
+  background:#302744!important;
+}
+html[data-theme="dark"] .distance-chip{
+  background:#172636;
+  border-color:#274663;
+}
+html[data-theme="dark"] .scout-picks-section{
+  border-color:#30323b;
+}
+html[data-theme="dark"] .preference-match{
+  background:#302a16;
+  border-color:#5f5125;
+}
+html[data-theme="dark"] .match-filter-btn{
+  background:#24262e;
+  color:#f2f3f6;
+  border-color:#3a3c46;
+}
+html[data-theme="dark"] .match-filter-btn.active,
+html[data-theme="dark"] .match-filter-btn[aria-pressed="true"]{
+  background:#f1f2f5;
+  color:#121318;
+}
+html[data-theme="dark"] .shows-map,
+html[data-theme="dark"] .journey-map{
+  background:#22242b;
+}
+html[data-theme="dark"] a{
+  color:inherit;
+}
+html[data-theme="dark"] dialog::backdrop{
+  background:rgba(0,0,0,.72);
+}
+@media (max-width:520px){
+  .theme-toggle{
+    padding:7px 9px;
+  }
+  .top-actions{
+    gap:2px;
+  }
+}
+

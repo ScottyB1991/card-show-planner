@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
-  <link rel="stylesheet" href="styles.css?v=25">
+  <link rel="stylesheet" href="styles.css?v=26">
 </head>
 <body>
   <header class="topbar">
@@ -16,7 +16,7 @@
       <div class="eyebrow">UK card shows</div>
       <h1>THE CARD MAP</h1><div class="brand-tagline">Your CardShow Scout</div>
     </div>
-    <div class="top-actions"><button id="authBtn" class="small-btn">👤 Sign in</button><button id="settingsBtn" class="icon-btn" aria-label="Developer settings" hidden>⚙️</button></div>
+    <div class="top-actions"><button id="themeToggleBtn" class="small-btn theme-toggle" type="button" aria-label="Switch to dark mode" title="Switch theme">🌙 Dark</button><button id="authBtn" class="small-btn">👤 Sign in</button><button id="settingsBtn" class="icon-btn" aria-label="Developer settings" hidden>⚙️</button></div>
   </header>
 
   <main>
@@ -61,9 +61,9 @@
       <div class="location-actions">
         <button id="useLocationBtn" type="button" class="primary">📍 Use my location & sort nearest</button>
         <button id="clearLocationBtn" type="button" class="secondary" hidden>Clear distance sorting</button>
-        <div class="location-or">or use a supported town / postcode area</div>
+        <div class="location-or">or enter a town / UK postcode</div>
         <div class="place-row">
-          <input id="placeInput" type="text" placeholder="Town or postcode" autocomplete="postal-code">
+          <input id="placeInput" type="text" placeholder="Town or UK postcode" autocomplete="postal-code" autocapitalize="characters">
           <button id="placeBtn" type="button" class="secondary">Set location</button>
         </div>
       </div>
@@ -208,6 +208,7 @@
   <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
   <script src="app.js?v=23"></script>
   <script src="trip-tools.js?v=24"></script>
+  <script src="tester-polish.js?v=26"></script>
 
 <dialog id="detailsDialog" class="modal">
   <div class="modal-card details-card">
