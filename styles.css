@@ -1343,3 +1343,44 @@ html[data-theme="dark"] .feature-ribbon span{
 #installInstructions strong{
   color:inherit;
 }
+
+
+/* THE CARD MAP v30 — in-app trip map */
+.trip-inline-map{
+  width:100%;
+  height:240px;
+  margin:12px 0 10px;
+  border:1px solid rgba(120,124,140,.28);
+  border-radius:16px;
+  overflow:hidden;
+  background:#e9e9ec;
+}
+.trip-map-tools{
+  display:flex;
+  margin:0 0 10px;
+}
+.trip-locate-btn{
+  width:100%;
+  min-height:42px;
+  border:1px solid rgba(225,20,32,.38);
+  border-radius:13px;
+  background:transparent;
+  color:inherit;
+  font:inherit;
+  font-weight:800;
+}
+.trip-locate-btn:disabled{opacity:.65}
+.trip-map-unavailable{
+  margin:12px 0 10px;
+  padding:14px;
+  border:1px dashed rgba(120,124,140,.35);
+  border-radius:14px;
+  text-align:center;
+}
+.trip-inline-map .leaflet-popup-content-wrapper,
+.trip-inline-map .leaflet-popup-tip{
+  color:#111;
+}
+@media (max-width:520px){
+  .trip-inline-map{height:210px}
+}

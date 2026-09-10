@@ -1,13 +1,13 @@
-const CACHE_NAME = 'the-card-map-v29.2';
+const CACHE_NAME = 'the-card-map-v30';
 const APP_SHELL = [
   './',
   './index.html',
-  './styles.css?v=29.2',
+  './styles.css?v=30',
   './app.js?v=23',
-  './trip-tools.js?v=24',
+  './trip-tools.js?v=30',
   './tester-polish.js?v=26',
   './card-identity.js?v=27.1',
-  './pwa.js?v=29.2',
+  './pwa.js?v=30',
   './manifest.webmanifest',
   './offline.html',
   './the-card-map-banner.png',
