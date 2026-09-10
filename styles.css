@@ -1317,3 +1317,20 @@ html[data-theme="dark"] .feature-ribbon span{
     object-position:center;
   }
 }
+
+
+/* THE CARD MAP v29 — installable PWA */
+.install-app-btn{
+  border-color:rgba(225,20,32,.45);
+}
+.install-dialog-card{
+  max-width:440px;
+}
+@media (max-width:520px){
+  .top-actions{
+    gap:7px;
+  }
+  .install-app-btn{
+    padding-inline:11px;
+  }
+}
