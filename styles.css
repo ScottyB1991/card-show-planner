@@ -1384,3 +1384,63 @@ html[data-theme="dark"] .feature-ribbon span{
 @media (max-width:520px){
   .trip-inline-map{height:210px}
 }
+
+
+/* THE CARD MAP v30.1 — trip routing + action-box polish */
+.trip-map-tools{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+}
+.trip-route-btn{
+  width:100%;
+  min-height:42px;
+  border:1px solid rgba(225,20,32,.38);
+  border-radius:13px;
+  background:transparent;
+  color:inherit;
+  font:inherit;
+  font-weight:800;
+}
+.trip-route-btn:disabled{opacity:.65}
+.trip-route-summary{
+  display:grid;
+  gap:2px;
+  margin:0 0 10px;
+  padding:12px 14px;
+  border:1px solid rgba(225,20,32,.32);
+  border-radius:14px;
+  background:rgba(225,20,32,.06);
+}
+.trip-route-summary strong{font-size:.98rem}
+.trip-route-summary span{font-weight:700}
+.trip-route-summary small{opacity:.72}
+
+/* Treat every show action as one visual family, whether it is a button or link. */
+.card-actions a,
+.details-actions a,
+.card-actions button,
+.details-actions button{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:40px;
+  padding:9px 13px;
+  border:1px solid rgba(120,124,140,.32);
+  border-radius:12px;
+  background:transparent;
+  color:inherit;
+  font:inherit;
+  font-weight:800;
+  line-height:1.1;
+  text-decoration:none;
+}
+.card-actions a:hover,
+.details-actions a:hover,
+.card-actions button:hover,
+.details-actions button:hover{
+  border-color:rgba(225,20,32,.48);
+}
+@media (max-width:420px){
+  .trip-map-tools{grid-template-columns:1fr}
+}

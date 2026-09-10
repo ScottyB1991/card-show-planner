@@ -53,7 +53,9 @@
         `<div class="trip-map-unavailable">📍 Map location unavailable for this show.</div>`}
       <div class="trip-map-tools">
         <button type="button" class="trip-locate-btn">◎ <span>Show my location</span></button>
+        <button type="button" class="trip-route-btn">🚗 <span>Route me there</span></button>
       </div>
+      <div class="trip-route-summary" hidden></div>
       <div class="trip-planner-actions">
         <a href="${tripSearchUrl("parking", event)}" target="_blank" rel="noopener">🅿️ <span>Parking</span></a>
         <a href="${tripSearchUrl("food", event)}" target="_blank" rel="noopener">🍔 <span>Food</span></a>
@@ -93,17 +95,33 @@
     }
 
     const locateBtn = planner.querySelector(".trip-locate-btn");
+    const routeBtn = planner.querySelector(".trip-route-btn");
+    const routeSummary = planner.querySelector(".trip-route-summary");
+    let myCoords = null;
+    let routeLayer = null;
+
     if (!coords || !navigator.geolocation) {
       if (locateBtn) locateBtn.hidden = true;
+      if (routeBtn) routeBtn.hidden = true;
       return;
     }
 
-    locateBtn?.addEventListener("click", () => {
+    async function getMyLocation() {
+      if (myCoords) return myCoords;
+      return new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(position => {
+          myCoords = [position.coords.latitude, position.coords.longitude];
+          resolve(myCoords);
+        }, reject, { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 });
+      });
+    }
+
+    locateBtn?.addEventListener("click", async () => {
       locateBtn.disabled = true;
       locateBtn.innerHTML = '⌛ <span>Finding you…</span>';
 
-      navigator.geolocation.getCurrentPosition(position => {
-        const mine = [position.coords.latitude, position.coords.longitude];
+      try {
+        const mine = await getMyLocation();
         if (tripMap) {
           L.circleMarker(mine, {
             radius: 8,
@@ -113,11 +131,55 @@
           tripMap.fitBounds(L.latLngBounds([coords, mine]), { padding: [28, 28], maxZoom: 13 });
         }
         locateBtn.innerHTML = '✓ <span>Location shown</span>';
-        locateBtn.disabled = false;
-      }, () => {
+      } catch (_) {
         locateBtn.innerHTML = '◎ <span>Show my location</span>';
-        locateBtn.disabled = false;
-      }, { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 });
+      }
+      locateBtn.disabled = false;
+    });
+
+    routeBtn?.addEventListener("click", async () => {
+      routeBtn.disabled = true;
+      routeBtn.innerHTML = '⌛ <span>Finding route…</span>';
+      if (routeSummary) routeSummary.hidden = true;
+
+      try {
+        const mine = await getMyLocation();
+        const url = `https://router.project-osrm.org/route/v1/driving/${mine[1]},${mine[0]};${coords[1]},${coords[0]}?overview=full&geometries=geojson&steps=false`;
+        const response = await fetch(url);
+        if (!response.ok) throw new Error("Route service unavailable");
+        const data = await response.json();
+        if (data.code !== "Ok" || !data.routes?.length) throw new Error("No route found");
+
+        const route = data.routes[0];
+        if (tripMap) {
+          if (routeLayer) tripMap.removeLayer(routeLayer);
+          routeLayer = L.geoJSON(route.geometry, {
+            style: { weight: 6, opacity: .85 }
+          }).addTo(tripMap);
+          L.circleMarker(mine, { radius: 8, weight: 3, fillOpacity: .9 })
+            .addTo(tripMap).bindPopup("You are here");
+          tripMap.fitBounds(routeLayer.getBounds(), { padding: [24, 24] });
+        }
+
+        const miles = route.distance / 1609.344;
+        const mins = Math.max(1, Math.round(route.duration / 60));
+        const time = mins >= 60
+          ? `${Math.floor(mins / 60)} hr ${mins % 60 ? `${mins % 60} min` : ""}`.trim()
+          : `${mins} min`;
+
+        if (routeSummary) {
+          routeSummary.innerHTML = `<strong>🚗 ${miles.toFixed(miles < 10 ? 1 : 0)} miles</strong><span>Approx. ${time} driving</span><small>Route: OSRM / OpenStreetMap data</small>`;
+          routeSummary.hidden = false;
+        }
+        routeBtn.innerHTML = '✓ <span>Route shown</span>';
+      } catch (_) {
+        if (routeSummary) {
+          routeSummary.innerHTML = '<strong>Route unavailable right now</strong><span>Please try again shortly.</span>';
+          routeSummary.hidden = false;
+        }
+        routeBtn.innerHTML = '🚗 <span>Route me there</span>';
+      }
+      routeBtn.disabled = false;
     });
   }
 
