@@ -13,7 +13,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="THE CARD MAP">
-  <link rel="stylesheet" href="styles.css?v=30.1">
+  <link rel="stylesheet" href="styles.css?v=30.2">
 </head>
 <body>
   <header class="topbar">
@@ -32,12 +32,12 @@
     </picture>
   </section>
 
-  <nav class="feature-ribbon" aria-label="THE CARD MAP features">
-    <span>🔎 Find Shows</span>
-    <span>⚡ Scout Picks</span>
-    <span>📍 Plan Trips</span>
-    <span>♡ Save Shows</span>
-  </nav>
+  <div class="feature-ribbon" aria-label="THE CARD MAP features">
+    <div class="feature-highlight"><strong>🔎 Find Shows</strong><small>Across the UK</small></div>
+    <div class="feature-highlight"><strong>⚡ Scout Picks</strong><small>Matched to you</small></div>
+    <div class="feature-highlight"><strong>📍 Plan Trips</strong><small>Maps &amp; routes</small></div>
+    <div class="feature-highlight"><strong>♡ Save Shows</strong><small>Build your plans</small></div>
+  </div>
 
     <section class="hero">
       <div>
@@ -229,6 +229,7 @@
   <script src="trip-tools.js?v=30.1"></script>
   <script src="tester-polish.js?v=26"></script>
   <script src="card-identity.js?v=27.1"></script>
+  <script src="ui-polish.js?v=30.2"></script>
 
 
 <dialog id="installDialog">
@@ -249,6 +250,6 @@
   </div>
 </dialog>
 
-  <script src="pwa.js?v=30.1"></script>
+  <script src="pwa.js?v=30.2"></script>
 </body>
 </html>
