@@ -1467,3 +1467,17 @@ html[data-theme="dark"] .region-picker-option[aria-checked="true"]{background:#1
 @media (max-width:420px){
   .trip-map-tools{grid-template-columns:1fr}
 }
+
+/* THE CARD MAP v30.4 — keep the dark trip planner readable in Light mode */
+.trip-planner,
+.trip-planner-head strong,
+.trip-locate-btn,
+.trip-route-btn,
+.trip-route-summary{
+  color:#fff;
+}
+.trip-planner-head span,
+.trip-planner-note,
+.trip-route-summary small{
+  color:#aaa7b1;
+}

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'the-card-map-v30.3';
+const CACHE_NAME = 'the-card-map-v30.4';
 const APP_SHELL = [
   './',
   './index.html',
