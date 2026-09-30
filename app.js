@@ -469,14 +469,20 @@ function render() {
   let filtered = currentEvents.filter(e => {
     const hay = [e.name,e.city,e.venue,e.postcode,e.region].join(" ").toLowerCase();
     const eventDate = e.date ? new Date(e.date + "T00:00:00") : null;
+    // A multi-day show remains current until its final day. If end_date is
+    // absent or earlier than the start date, fall back safely to date.
+    const finalDateString = e.end_date && e.date && e.end_date >= e.date ? e.end_date : e.date;
+    const finalEventDate = finalDateString ? new Date(finalDateString + "T00:00:00") : null;
     let dateMatches = true;
     if (dateFilter !== "all") {
-      if (!eventDate || Number.isNaN(eventDate.getTime())) {
+      if (!eventDate || Number.isNaN(eventDate.getTime()) || !finalEventDate || Number.isNaN(finalEventDate.getTime())) {
         dateMatches = false;
       } else if (dateFilter === "upcoming") {
-        dateMatches = eventDate >= today;
+        dateMatches = finalEventDate >= today;
       } else if (dateFilter === "month") {
-        dateMatches = eventDate >= today && eventDate <= monthEnd;
+        // Include shows that overlap the current month, including runs that
+        // started earlier but have not yet finished.
+        dateMatches = finalEventDate >= today && eventDate <= monthEnd;
       } else if (dateFilter === "later") {
         dateMatches = eventDate > monthEnd;
       }
