@@ -1481,3 +1481,10 @@ html[data-theme="dark"] .region-picker-option[aria-checked="true"]{background:#1
 .trip-route-summary small{
   color:#aaa7b1;
 }
+/* Light-mode contrast fix for always-dark account panels */
+.scout-signals-card,
+.scout-signals-card strong,
+.scout-signal-stat strong,
+.scout-category-signal strong {
+  color: #fff;
+}
