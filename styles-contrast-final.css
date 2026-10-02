@@ -1,0 +1,34 @@
+/* Final targeted contrast fixes only — no layout changes */
+
+/* Scout Picks dark panel headings */
+.scout-picks h2,
+.scout-picks h3 {
+  color: #ffffff !important;
+}
+
+/* Scout Pick event cards — restore dark text on white */
+.scout-picks .event-card h2,
+.scout-picks .event-card h3,
+.scout-picks .event-card .event-title,
+.scout-picks .event-card strong {
+  color: #202024 !important;
+}
+
+/* Scout Pick pale badges — readable dark text */
+.scout-picks .event-card .badge,
+.scout-picks .event-card .chip,
+.scout-picks .event-card .tag {
+  color: #303038 !important;
+}
+
+/* Dark account panels — headings stay white */
+.favourites-section h2,
+.favourites-section h3,
+.reminders-section h2,
+.reminders-section h3,
+.card-preferences h2,
+.card-preferences h3,
+.scout-signals h2,
+.scout-signals h3 {
+  color: #ffffff !important;
+}
