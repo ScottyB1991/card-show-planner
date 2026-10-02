@@ -1530,3 +1530,51 @@ html[data-theme="dark"] .region-picker-option[aria-checked="true"]{background:#1
 .collector-journey .journey-map-title span{
   color:#aaa7b1;
 }
+
+/* =========================================================
+   THE CARD MAP — light-mode contrast repair
+   Existing layout/backgrounds preserved.
+   ========================================================= */
+html:not([data-theme="dark"]) .scout-picks-section,
+html:not([data-theme="dark"]) .favourites-card,
+html:not([data-theme="dark"]) .reminder-card,
+html:not([data-theme="dark"]) .preferences-card,
+html:not([data-theme="dark"]) .scout-signals-card,
+html:not([data-theme="dark"]) .collector-journey,
+html:not([data-theme="dark"]) .show-notes {
+  color:#f4f4f7;
+}
+
+html:not([data-theme="dark"]) .scout-picks-head h2,
+html:not([data-theme="dark"]) .favourites-head strong,
+html:not([data-theme="dark"]) .reminder-head strong,
+html:not([data-theme="dark"]) .preferences-head strong,
+html:not([data-theme="dark"]) .scout-signals-head strong,
+html:not([data-theme="dark"]) .journey-head h3,
+html:not([data-theme="dark"]) .journey-map-title,
+html:not([data-theme="dark"]) .show-notes summary {
+  color:#f4f4f7;
+}
+
+html:not([data-theme="dark"]) .scout-picks-head p,
+html:not([data-theme="dark"]) .favourites-head span,
+html:not([data-theme="dark"]) .reminder-empty,
+html:not([data-theme="dark"]) .preferences-copy,
+html:not([data-theme="dark"]) .preferences-head span,
+html:not([data-theme="dark"]) .scout-signals-copy,
+html:not([data-theme="dark"]) .journey-stat small,
+html:not([data-theme="dark"]) .journey-map-title span,
+html:not([data-theme="dark"]) .show-notes .note-state {
+  color:#b9b7c1;
+}
+
+html:not([data-theme="dark"]) .scout-top-pick,
+html:not([data-theme="dark"]) .scout-top-pick strong,
+html:not([data-theme="dark"]) .favourite-item strong,
+html:not([data-theme="dark"]) .reminder-item strong,
+html:not([data-theme="dark"]) .scout-signal-stat strong,
+html:not([data-theme="dark"]) .scout-category-signal strong,
+html:not([data-theme="dark"]) .journey-stat strong {
+  color:#f4f4f7;
+}
+
