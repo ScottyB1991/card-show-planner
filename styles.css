@@ -1481,29 +1481,52 @@ html[data-theme="dark"] .region-picker-option[aria-checked="true"]{background:#1
 .trip-route-summary small{
   color:#aaa7b1;
 }
-/* Light-mode contrast fix for always-dark account panels */
+
+
+/* THE CARD MAP v30.5 — account deletion */
+.danger-zone{margin-top:18px;padding:16px;border:1px solid rgba(225,20,32,.34);border-radius:14px;background:rgba(225,20,32,.06)}
+.danger-zone strong{display:block;margin-bottom:5px}
+.danger-zone p{margin:0 0 12px;color:var(--muted,#777);font-size:.92rem;line-height:1.45}
+.danger-button{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:10px 14px;border:1px solid #c51420;border-radius:12px;background:#c51420;color:#fff;font:inherit;font-weight:800;cursor:pointer}
+.danger-button:disabled{opacity:.45;cursor:not-allowed}
+.delete-account-card{max-width:520px}
+.delete-confirm-label{display:grid;gap:7px;margin:16px 0}
+.delete-confirm-label input{width:100%;box-sizing:border-box}
+.dialog-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;margin-top:16px}
+
+/* THE CARD MAP — minimal light-mode contrast repair for always-dark account panels */
+.favourites-card,
 .scout-signals-card,
-.scout-signals-card strong,
-.scout-signal-stat strong,
-.scout-category-signal strong {
-  color: #fff;
+.preferences-card,
+.reminder-card,
+.collector-journey{
+  color:#f4f4f7;
 }
 
-/* Light-mode contrast fix for Collector Journey */
-.collector-journey,
-.collector-journey h2,
-.collector-journey strong,
-.journey-stat,
-.journey-stat strong,
-.favourites-section,
-.favourites-section h2 {
-  color: #fff;
+.favourites-card .favourites-head strong,
+.scout-signals-card .scout-signals-head strong,
+.scout-signals-card .scout-signal-stat strong,
+.scout-signals-card .scout-category-signal strong,
+.preferences-card .preferences-head strong,
+.reminder-card .reminder-head strong,
+.collector-journey .journey-head h3,
+.collector-journey .journey-stat strong,
+.collector-journey .journey-map-title{
+  color:#f4f4f7;
 }
-/* Final light-mode contrast fix for always-dark account panels */
-.favourites-section h2,
-.saved-notes-toggle,
-.saved-notes-toggle strong,
-.reminders-card h2,
-.preferences-card h2 {
-  color: #fff !important;
+
+.favourites-card .favourites-head span,
+.scout-signals-card .scout-signals-head span,
+.scout-signals-card .scout-signals-copy,
+.scout-signals-card .scout-signal-stat small,
+.scout-signals-card .scout-signals-label,
+.scout-signals-card .scout-category-signal span,
+.preferences-card .preferences-head span,
+.preferences-card .preferences-copy,
+.preferences-card .preferences-status,
+.reminder-card .reminder-head span,
+.reminder-card .reminder-empty,
+.collector-journey .journey-stat small,
+.collector-journey .journey-map-title span{
+  color:#aaa7b1;
 }
