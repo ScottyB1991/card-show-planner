@@ -1499,3 +1499,11 @@ html[data-theme="dark"] .region-picker-option[aria-checked="true"]{background:#1
 .favourites-section h2 {
   color: #fff;
 }
+/* Final light-mode contrast fix for always-dark account panels */
+.favourites-section h2,
+.saved-notes-toggle,
+.saved-notes-toggle strong,
+.reminders-card h2,
+.preferences-card h2 {
+  color: #fff !important;
+}
