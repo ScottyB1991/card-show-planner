@@ -1578,3 +1578,48 @@ html:not([data-theme="dark"]) .journey-stat strong {
   color:#f4f4f7;
 }
 
+/* =========================================================
+   THE CARD MAP — final light-mode contrast cleanup
+   Only text colours; no layout/background changes.
+   ========================================================= */
+
+/* Scout Picks: event cards are white, so their normal text must stay dark. */
+html:not([data-theme="dark"]) .scout-picks-list .event {
+  color:#17181c;
+}
+html:not([data-theme="dark"]) .scout-picks-list .event h3,
+html:not([data-theme="dark"]) .scout-picks-list .event .date {
+  color:#17181c;
+}
+html:not([data-theme="dark"]) .scout-picks-list .event .meta {
+  color:#676a73;
+}
+html:not([data-theme="dark"]) .scout-picks-list .event .tag:not(.preference-match) {
+  color:#202127;
+}
+html:not([data-theme="dark"]) .scout-picks-list .event .preference-match {
+  color:#fff;
+}
+html:not([data-theme="dark"]) .scout-picks-list .event .scout-top-pick,
+html:not([data-theme="dark"]) .scout-picks-list .event .scout-top-pick strong {
+  color:#f4f4f7;
+}
+html:not([data-theme="dark"]) .scout-picks-list .event .scout-why {
+  color:#d6d3dc;
+}
+html:not([data-theme="dark"]) .scout-picks-list .event .scout-why strong {
+  color:#fff;
+}
+
+/* Show History sits on the white account background. */
+html:not([data-theme="dark"]) .history-kicker,
+html:not([data-theme="dark"]) .history-title-row .history-kicker {
+  color:#5f6068;
+}
+html:not([data-theme="dark"]) .history-title-row strong {
+  color:#5f6068;
+}
+html:not([data-theme="dark"]) .history-subtitle {
+  color:#686a73;
+}
+
