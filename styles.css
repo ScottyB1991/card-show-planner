@@ -1488,3 +1488,14 @@ html[data-theme="dark"] .region-picker-option[aria-checked="true"]{background:#1
 .scout-category-signal strong {
   color: #fff;
 }
+
+/* Light-mode contrast fix for Collector Journey */
+.collector-journey,
+.collector-journey h2,
+.collector-journey strong,
+.journey-stat,
+.journey-stat strong,
+.favourites-section,
+.favourites-section h2 {
+  color: #fff;
+}
