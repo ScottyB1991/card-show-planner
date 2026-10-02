@@ -1,0 +1,1509 @@
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#f7f7fb;color:#17181c}button,input,select{font:inherit}body{min-height:100vh}.topbar{display:flex;justify-content:space-between;align-items:center;padding:18px 18px 10px;max-width:760px;margin:auto}.eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:#6d6f78}h1{font-size:25px;margin:3px 0 0}main{max-width:760px;margin:auto;padding:10px 18px 40px}.hero{background:#fff;border:1px solid #e5e5eb;border-radius:22px;padding:20px;margin:10px 0 16px;display:flex;justify-content:space-between;gap:16px;align-items:flex-start}.hero h2{margin:0 0 5px;font-size:23px}.hero p{margin:0;color:#686b74}.badge{white-space:nowrap;border-radius:999px;background:#eeeef4;padding:7px 10px;font-size:12px}.card{background:#fff;border:1px solid #e5e5eb;border-radius:18px;padding:14px}.filters{display:grid;grid-template-columns:1fr 160px;gap:10px;margin-bottom:22px}label{display:block}label span{display:block;font-size:12px;font-weight:700;margin:0 0 6px;color:#5d6068}input,select{width:100%;border:1px solid #d9d9e1;border-radius:12px;padding:11px 12px;background:#fff;outline:none}input:focus,select:focus{border-color:#777b87}.section-head{display:flex;justify-content:space-between;align-items:center;gap:10px}.section-head h2{font-size:18px;margin:0 0 10px}.section-head span{font-size:12px;color:#70727a}.events{display:grid;gap:12px}.event{background:#fff;border:1px solid #e5e5eb;border-radius:18px;padding:16px}.event-top{display:flex;justify-content:space-between;gap:10px}.event h3{margin:0;font-size:18px}.date{font-weight:800;margin:8px 0 2px}.meta{color:#676a73;font-size:13px;line-height:1.5}.tags{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}.tag{font-size:11px;border-radius:999px;padding:5px 8px;background:#f0f0f5}.actions{display:flex;gap:8px;margin-top:12px}.actions button,.actions a{flex:1;text-align:center;text-decoration:none;border:0;border-radius:11px;padding:10px 12px;cursor:pointer}.primary{background:#17181c;color:#fff}.secondary{background:#ededf2;color:#202127}.saved{background:#f0e9ff!important}.icon-btn{border:0;background:transparent;padding:7px;cursor:pointer;font-size:20px}.muted{color:#696b73;font-size:13px;line-height:1.45}.status{font-size:12px;color:#686a73}.dialog-card{border:0;border-radius:20px;padding:20px;max-width:560px;width:calc(100vw - 30px)}dialog::backdrop{background:rgba(0,0,0,.35)}.dialog-card label{margin:12px 0}.dialog-actions{display:flex;gap:8px;margin-top:15px}.dialog-actions button{flex:1;border:0;border-radius:11px;padding:11px;cursor:pointer}.empty{background:#fff;border:1px dashed #d5d5de;border-radius:18px;padding:25px;text-align:center;color:#696b73}@media(max-width:600px){.filters{grid-template-columns:1fr}.hero{display:block}.badge{display:inline-block;margin-top:12px}.actions{flex-direction:column}}
+.top-actions{display:flex;align-items:center;gap:4px}.small-btn{border:1px solid #d9d9e1;background:#fff;border-radius:999px;padding:7px 11px;cursor:pointer;font-size:12px;font-weight:700}.signout{width:100%;margin-top:8px}.authDialog{}
+.account-card{max-height:88vh;overflow:auto}
+.account-summary{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid #e7e7ee;border-radius:16px;background:#fafafd;margin:10px 0 16px}
+.account-avatar{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#fff;border:1px solid #e1e1e8;font-size:21px}
+.saved-section h3{margin:0}
+.saved-events{display:grid;gap:9px;margin-top:10px}
+.saved-event{padding:11px 12px;border:1px solid #e3e3ea;border-radius:14px;background:#fff}
+.saved-event .saved-title{font-weight:800;margin-bottom:4px}
+.saved-event .saved-meta{font-size:12px;color:#666;margin-bottom:8px}
+.saved-event .saved-actions{display:flex;gap:7px;flex-wrap:wrap}
+.saved-event a,.saved-event button{font-size:12px}
+.empty-saved{padding:18px 10px;text-align:center;border:1px dashed #d7d7df;border-radius:14px;color:#777}
+.future-card{display:flex;flex-direction:column;gap:3px;padding:12px;margin-top:10px;border-radius:14px;background:#f7f7fb;border:1px solid #e6e6ed;font-size:13px}
+.future-card span{color:#6d6d76;font-size:12px;line-height:1.45}
+
+
+/* Search and date filter layout */
+.filters { display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 10px; }
+@media (max-width: 640px) { .filters { grid-template-columns: 1fr; } }
+
+
+.location-card{margin:16px 0}.location-actions{display:grid;gap:10px}.location-or{text-align:center;color:#777;font-size:12px}.place-row{display:grid;grid-template-columns:1fr auto;gap:8px}.place-row input{min-width:0}.location-filter-row{margin-top:12px}.location-filter-row label{display:block}.location-filter-row select{width:100%}.distance-badge{display:inline-block;margin-left:6px}.status.error{color:#b42318}.location-card .status{margin:10px 0 0}
+
+.brand-tagline{
+  display:block;
+  margin-top:2px;
+  font-size:.72em;
+  font-weight:600;
+  opacity:.72;
+  letter-spacing:.02em;
+}
+
+/* The Card Map — show card polish */
+.event-card,
+.show-card,
+.card {
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.event-card {
+  transition: transform .16s ease, box-shadow .16s ease;
+}
+
+.event-card:hover {
+  transform: translateY(-2px);
+}
+
+.event-card h3,
+.show-card h3 {
+  line-height: 1.2;
+  margin-bottom: .45rem;
+}
+
+.event-card .meta,
+.show-card .meta {
+  line-height: 1.45;
+}
+
+.event-card button,
+.show-card button {
+  min-height: 42px;
+  border-radius: 12px;
+  font-weight: 700;
+}
+
+@media (max-width: 640px) {
+  .event-card,
+  .show-card {
+    border-radius: 16px;
+  }
+
+  .event-card button,
+  .show-card button {
+    width: 100%;
+  }
+}
+
+/* The Card Map — show card polish v2 */
+.event {
+  border-radius: 18px;
+  padding: 1rem;
+  box-shadow: 0 8px 24px rgba(0,0,0,.07);
+  transition: transform .16s ease, box-shadow .16s ease;
+}
+.event:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(0,0,0,.11);
+}
+.event-top {
+  gap: .75rem;
+  align-items: flex-start;
+}
+.event-top h3 {
+  line-height: 1.25;
+  margin-bottom: .35rem;
+}
+.event .date {
+  font-weight: 700;
+}
+.event .meta {
+  line-height: 1.5;
+  margin-top: .65rem;
+}
+.event .tags {
+  margin-top: .65rem;
+}
+.event .actions {
+  gap: .6rem;
+  margin-top: .9rem;
+}
+.event .actions button,
+.event .actions a {
+  min-height: 42px;
+  border-radius: 12px;
+  font-weight: 700;
+}
+@media (max-width: 640px) {
+  .event {
+    padding: .9rem;
+  }
+  .event .actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+  .event .actions button,
+  .event .actions a {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+.details-card{
+  position:relative;
+  max-width:620px;
+  width:min(92vw,620px);
+}
+.details-card .icon-btn{
+  position:absolute;
+  top:.75rem;
+  right:.75rem;
+}
+.details-body{
+  padding-top:.5rem;
+}
+.details-body h2{
+  margin:0 2.5rem .75rem 0;
+  line-height:1.2;
+}
+.details-meta{
+  display:grid;
+  gap:.45rem;
+  margin:1rem 0;
+}
+.details-description{
+  line-height:1.6;
+  margin:1rem 0;
+}
+.details-actions{
+  display:grid;
+  gap:.6rem;
+  margin-top:1.1rem;
+}
+.details-actions a,
+.details-actions button{
+  min-height:44px;
+  border-radius:12px;
+  font-weight:700;
+}
+
+
+/* The Card Map — directions upgrade */
+.map-action{
+  display:grid;
+  place-items:center;
+  text-decoration:none;
+}
+.saved-actions a,
+.saved-actions button{
+  min-height:38px;
+  border-radius:10px;
+  padding:8px 10px;
+  text-decoration:none;
+  display:grid;
+  place-items:center;
+}
+
+
+/* The Card Map — My Card Map planner upgrade */
+.next-show-card{
+  margin:14px 0 18px;
+  padding:16px;
+  border:2px solid #17171b;
+  border-radius:16px;
+  background:#fff;
+}
+.next-show-card[hidden]{display:none}
+.next-show-kicker{font-size:11px;font-weight:900;letter-spacing:.08em;margin-bottom:7px}
+.next-show-title{font-size:20px;font-weight:900;line-height:1.15;margin-bottom:7px}
+.next-show-meta{font-size:13px;color:#5f5f68;margin-bottom:12px}
+.next-show-actions{display:flex;gap:7px;flex-wrap:wrap}
+.next-show-actions a,.next-show-actions button{font-size:12px;text-decoration:none;min-height:38px;display:grid;place-items:center}
+.saved-group-label{font-size:11px;font-weight:900;letter-spacing:.08em;color:#666;margin:12px 2px 7px}
+.past-shows{margin-top:14px}
+.past-shows summary{cursor:pointer;font-weight:800;font-size:13px;padding:10px 2px}
+.saved-past{opacity:.7}
+@media (max-width:640px){
+  .next-show-actions{display:grid;grid-template-columns:1fr}
+  .next-show-actions a,.next-show-actions button{width:100%;text-align:center}
+}
+
+
+/* Shows Near Me — local distance sorting */
+.distance-chip{font-weight:800;background:#eef7ff;border:1px solid #d5eaff}
+#clearLocationBtn[hidden]{display:none}
+.location-card .primary,.location-card .secondary{min-height:44px;border:0;border-radius:12px;padding:10px 12px;cursor:pointer;font-weight:750}
+.location-card .secondary{border:1px solid #dddde5}
+@media(max-width:640px){.place-row{grid-template-columns:1fr}.location-card button{width:100%}}
+
+/* The Card Map — mobile polish pass */
+:root{--tap:46px}
+html{-webkit-text-size-adjust:100%}
+body{overflow-x:hidden}
+.topbar{padding-top:max(18px,env(safe-area-inset-top));gap:10px}
+.top-actions{flex-wrap:wrap;justify-content:flex-end}
+.small-btn{min-height:38px}
+.hero{box-shadow:0 8px 28px rgba(20,20,30,.045)}
+.filters.card,.location-card.card{padding:16px}
+.filters input,.filters select,.location-card input,.location-card select{min-height:46px}
+.section-head{margin-top:4px}
+.event{box-shadow:0 6px 20px rgba(0,0,0,.055)}
+.event .actions button,.event .actions a{display:grid;place-items:center}
+.dialog-card{max-height:90dvh;overflow:auto}
+.dialog-actions button,.details-actions a,.details-actions button{min-height:var(--tap)}
+
+@media(max-width:640px){
+  .topbar{padding-left:14px;padding-right:14px;align-items:flex-start}
+  .eyebrow{font-size:10px}
+  h1{font-size:22px;line-height:1.08}
+  .brand-tagline{font-size:.66em}
+  .top-actions{gap:3px}
+  .small-btn{font-size:11px;padding:7px 9px}
+  .icon-btn{padding:6px}
+  main{padding:6px 12px calc(28px + env(safe-area-inset-bottom))}
+  .hero{margin:8px 0 12px;padding:16px;border-radius:18px}
+  .hero h2{font-size:21px;line-height:1.15}
+  .hero p{font-size:14px;line-height:1.45}
+  .badge{margin-top:10px;padding:6px 9px}
+  .filters{gap:9px;margin-bottom:14px;padding:13px!important;border-radius:16px}
+  label span{margin-bottom:5px}
+  input,select{font-size:16px;padding:10px 11px}
+  .location-card{margin:12px 0;padding:13px!important;border-radius:16px}
+  .location-card .muted{margin-top:4px}
+  .location-actions{gap:8px}
+  .location-or{margin:-1px 0}
+  .location-filter-row{margin-top:9px}
+  .section-head{align-items:baseline;margin:4px 1px 2px}
+  .section-head h2{font-size:17px;margin-bottom:8px}
+  .events{gap:10px}
+  .event{padding:14px;border-radius:16px;box-shadow:0 5px 16px rgba(0,0,0,.05)}
+  .event:hover{transform:none}
+  .event h3{font-size:17px;line-height:1.22}
+  .date{margin-top:7px;font-size:14px}
+  .meta{font-size:12.5px}
+  .tags{gap:5px;margin:8px 0}
+  .tag{font-size:10.5px;padding:4px 7px}
+  .event .actions{gap:7px;margin-top:10px}
+  .event .actions button,.event .actions a{min-height:44px;padding:9px 11px}
+  .dialog-card{width:calc(100vw - 18px);padding:17px;border-radius:18px;max-height:92dvh}
+  .details-body h2{font-size:21px;margin-right:2.2rem}
+  .details-description{font-size:14px;line-height:1.55}
+  .details-actions{gap:7px}
+  .account-card{width:calc(100vw - 18px);padding:15px;max-height:92dvh}
+  .account-summary{padding:10px;margin:8px 0 12px}
+  .next-show-card{margin:10px 0 14px;padding:14px;border-width:1.5px;border-radius:15px}
+  .next-show-title{font-size:19px}
+  .next-show-meta{margin-bottom:10px}
+  .next-show-actions{gap:7px}
+  .next-show-actions a,.next-show-actions button{min-height:44px;border-radius:11px}
+  .saved-events{gap:8px}
+  .saved-event{padding:10px 11px}
+  .saved-event .saved-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+  .saved-event .saved-actions a,.saved-event .saved-actions button{width:100%;min-height:40px;text-align:center}
+  .saved-event .saved-actions>*:last-child:nth-child(odd){grid-column:1/-1}
+}
+
+@media(max-width:380px){
+  .topbar{display:block}
+  .top-actions{justify-content:flex-start;margin-top:9px}
+}
+
+/* The Card Map — interactive map view */
+.shows-head-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.view-toggle{display:flex;gap:4px;padding:3px;background:#f0f0f5;border:1px solid #e0e0e8;border-radius:12px}
+.view-btn{border:0;background:transparent;border-radius:9px;padding:8px 11px;min-height:38px;font-weight:800;cursor:pointer;color:#5d5d66}
+.view-btn.active{background:#fff;color:#17171b;box-shadow:0 1px 5px rgba(0,0,0,.09)}
+.map-view[hidden],.events[hidden]{display:none!important}
+.shows-map{height:min(68vh,620px);min-height:430px;width:100%;border:1px solid #dedee6;border-radius:18px;overflow:hidden;box-shadow:0 7px 24px rgba(0,0,0,.06);background:#ececf1}
+.map-note{font-size:12px;color:#707079;margin:8px 4px 0;line-height:1.45}
+.map-popup{min-width:190px;max-width:245px}
+.map-popup strong{display:block;font-size:14px;line-height:1.25;margin-bottom:4px}
+.map-popup-meta{font-size:12px;color:#62626b;line-height:1.4;margin-bottom:9px}
+.map-popup-actions{display:flex;gap:6px;flex-wrap:wrap}
+.map-popup-actions button,.map-popup-actions a{border:1px solid #d9d9e1;background:#fff;color:#17171b;border-radius:8px;padding:6px 8px;font-size:11px;font-weight:800;text-decoration:none;cursor:pointer}
+.map-popup-actions .popup-primary{background:#17171b;color:#fff;border-color:#17171b}
+.leaflet-popup-content{margin:13px 14px}
+.leaflet-control-attribution{font-size:9px}
+@media(max-width:640px){
+  .shows-head{align-items:flex-start}
+  .shows-head-actions{width:100%;justify-content:space-between;gap:7px}
+  .view-toggle{margin-left:auto}
+  .view-btn{padding:7px 10px;min-height:36px}
+  .shows-map{height:62vh;min-height:390px;border-radius:16px}
+}
+
+
+/* The Card Map — clustered map pins */
+.marker-cluster-small,.marker-cluster-medium,.marker-cluster-large{background:rgba(23,23,27,.16)}
+.marker-cluster-small div,.marker-cluster-medium div,.marker-cluster-large div{background:#17171b;color:#fff;font-weight:900;box-shadow:0 2px 8px rgba(0,0,0,.18)}
+.marker-cluster span{font-size:12px}
+
+/* Cluster quick-list */
+.cluster-popup-shell .leaflet-popup-content { margin: 12px; }
+.cluster-list-popup { min-width: 0; }
+.cluster-list-head { display: grid; gap: 2px; margin-bottom: 8px; }
+.cluster-list-head strong { font-size: 15px; }
+.cluster-list-head span, .cluster-more { font-size: 12px; opacity: .72; }
+.cluster-show-list { display: grid; gap: 6px; max-height: 260px; overflow-y: auto; overscroll-behavior: contain; }
+.cluster-show-row { width: 100%; text-align: left; border: 1px solid rgba(255,255,255,.14); border-radius: 10px; padding: 9px 10px; background: rgba(255,255,255,.06); color: inherit; display: grid; gap: 2px; cursor: pointer; }
+.cluster-show-name { font-weight: 800; line-height: 1.2; }
+.cluster-show-meta { font-size: 12px; opacity: .76; line-height: 1.3; }
+.cluster-more { padding: 7px 2px 2px; }
+.cluster-zoom-btn { width: 100%; margin-top: 9px; border: 0; border-radius: 10px; padding: 10px 12px; font-weight: 800; cursor: pointer; }
+@media (max-width: 520px) {
+  .cluster-show-list { max-height: 220px; }
+  .cluster-popup-shell .leaflet-popup-content { width: min(270px, 72vw) !important; }
+}
+
+
+/* Personal show status tracker */
+.show-status-picker{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:9px 0 10px}
+.status-choice{min-height:38px;padding:7px 6px;border:1px solid #4d4d57;border-radius:10px;background:#202024;color:#d9d9df;font:inherit;font-size:11px;font-weight:800;cursor:pointer}
+.status-choice.active{background:#5c5c64;color:#fff;border-color:#8b8b96;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+.next-show-empty{font-size:13px;line-height:1.45;color:#bdbdc6}
+@media(max-width:560px){.show-status-picker{grid-template-columns:1fr;gap:5px}.status-choice{min-height:40px;font-size:12px}}
+
+/* The Card Map — compact personal tracker polish */
+.show-status-picker{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:7px;
+  margin:10px 0 12px;
+  padding:4px;
+  border:1px solid #45454d;
+  border-radius:14px;
+  background:#18181c;
+}
+.status-choice{
+  min-width:0;
+  min-height:42px;
+  padding:8px 5px;
+  border:1px solid transparent;
+  border-radius:10px;
+  background:transparent;
+  color:#aaaab4;
+  font-size:11px;
+  line-height:1.15;
+  font-weight:850;
+  white-space:nowrap;
+  box-shadow:none;
+  transition:background .15s ease,border-color .15s ease,color .15s ease,transform .15s ease;
+}
+.status-choice:active{transform:scale(.98)}
+.status-choice.active{
+  background:#5d5d66;
+  color:#fff;
+  border-color:#777782;
+  box-shadow:0 2px 8px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.08);
+}
+.saved-event{border-radius:16px}
+.saved-event .saved-actions{margin-top:9px}
+.saved-event .saved-actions a,.saved-event .saved-actions button{border-radius:11px}
+
+@media(max-width:560px){
+  .show-status-picker{grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;padding:4px}
+  .status-choice{min-height:40px;padding:7px 2px;font-size:10.5px;letter-spacing:-.01em}
+  .saved-event{padding:12px}
+  .saved-event h3{font-size:16px;line-height:1.2}
+  .saved-event .meta{font-size:12px;line-height:1.35}
+}
+
+@media(max-width:360px){
+  .status-choice{font-size:9.5px}
+}
+
+/* The Card Map — compact Next Show action grid */
+.next-show-actions{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:7px;
+}
+.next-show-actions a,.next-show-actions button{
+  width:100%;
+  min-width:0;
+  min-height:42px;
+  padding:9px 8px;
+  border-radius:10px;
+  text-align:center;
+}
+@media(max-width:640px){
+  .next-show-actions{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+  .next-show-actions a,.next-show-actions button{min-height:40px;padding:8px 6px;font-size:11.5px}
+}
+
+
+/* The Card Map — planner summary + attended history */
+.planner-stats{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:7px;
+  margin:10px 0 12px;
+}
+.planner-stats[hidden]{display:none}
+.planner-stat{
+  min-width:0;
+  display:grid;
+  grid-template-columns:auto auto;
+  grid-template-rows:auto auto;
+  align-items:center;
+  justify-content:center;
+  column-gap:5px;
+  padding:9px 6px;
+  border:1px solid #44444c;
+  border-radius:13px;
+  background:#1b1b1f;
+  text-align:center;
+}
+.planner-stat span{grid-row:1;font-size:15px}
+.planner-stat strong{grid-row:1;font-size:16px;line-height:1}
+.planner-stat small{grid-column:1/-1;margin-top:3px;color:#aaaab4;font-size:10px;font-weight:750;line-height:1.1}
+.show-history{
+  display:grid;
+  gap:8px;
+  margin-top:14px;
+  padding-top:12px;
+  border-top:1px solid #45454d;
+}
+.history-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:0 2px 2px;
+}
+.history-head>div{display:grid;gap:2px}
+.history-kicker{font-size:10px;font-weight:900;letter-spacing:.09em;color:#bdbdc6}
+.history-head strong{font-size:14px}
+.history-trophy{font-size:21px}
+.show-history .saved-event{opacity:.92}
+.show-history .saved-past{opacity:.92}
+@media(max-width:420px){
+  .planner-stats{gap:5px}
+  .planner-stat{padding:8px 3px}
+  .planner-stat small{font-size:9.5px}
+}
+
+/* The Card Map — Show History polish + sensible attended rules */
+.history-head{
+  display:block;
+  padding:2px 2px 4px;
+}
+.history-title-row{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  gap:12px;
+}
+.history-title-row .history-kicker{
+  font-size:11px;
+  line-height:1.2;
+}
+.history-title-row strong{
+  flex:0 0 auto;
+  font-size:12px;
+  color:#d8d8df;
+  font-weight:800;
+}
+.history-subtitle{
+  margin-top:5px;
+  color:#a9a9b3;
+  font-size:11px;
+  font-weight:650;
+}
+.status-choice.locked,
+.status-choice:disabled{
+  opacity:.42;
+  cursor:not-allowed;
+  filter:saturate(.45);
+  transform:none;
+}
+.status-hint{
+  margin:-4px 2px 9px;
+  color:#92929c;
+  font-size:10px;
+  line-height:1.3;
+  text-align:center;
+}
+@media(max-width:420px){
+  .history-title-row{gap:8px}
+  .history-title-row .history-kicker{font-size:10px}
+  .history-title-row strong{font-size:11px}
+  .history-subtitle{font-size:10px}
+}
+
+/* The Card Map — Personal Show Notes */
+.show-notes{
+  margin:10px 0 12px;
+  border:1px solid #484850;
+  border-radius:14px;
+  background:#18181d;
+  overflow:hidden;
+}
+.show-notes summary{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  min-height:44px;
+  padding:10px 13px;
+  cursor:pointer;
+  list-style:none;
+  font-weight:800;
+  font-size:13px;
+}
+.show-notes summary::-webkit-details-marker{display:none}
+.show-notes summary::after{content:"⌄";color:#8f8f99;font-size:14px;margin-left:2px}
+.show-notes[open] summary::after{content:"⌃"}
+.show-notes .note-state{
+  margin-left:auto;
+  color:#9b9ba5;
+  font-size:10px;
+  font-weight:750;
+  white-space:nowrap;
+}
+.show-notes-editor{
+  padding:0 11px 11px;
+  border-top:1px solid #34343b;
+}
+.show-notes textarea{
+  display:block;
+  width:100%;
+  min-height:92px;
+  margin:11px 0 9px;
+  padding:11px 12px;
+  resize:vertical;
+  border:1px solid #4a4a53;
+  border-radius:12px;
+  background:#111115;
+  color:#f4f4f7;
+  font:inherit;
+  font-size:13px;
+  line-height:1.45;
+  box-sizing:border-box;
+}
+.show-notes textarea:focus{outline:2px solid #72727e;outline-offset:1px}
+.show-notes-actions{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
+.show-notes-actions .secondary{min-height:40px;padding:8px 12px}
+.note-clear{
+  min-height:40px;
+  padding:8px 13px;
+  border:1px solid #414149;
+  border-radius:11px;
+  background:transparent;
+  color:#aaaab4;
+  font-weight:750;
+}
+.note-save-status{min-height:16px;margin-top:6px;color:#9d9da7;font-size:10px;text-align:right}
+@media(max-width:420px){
+  .show-notes{margin:9px 0 11px}
+  .show-notes summary{min-height:42px;padding:9px 11px;font-size:12px}
+  .show-notes textarea{min-height:84px;font-size:12px}
+}
+
+/* The Card Map — Collector Journey */
+.collector-journey{margin:14px 0 18px;padding:14px;border:1px solid #3d3d45;border-radius:18px;background:linear-gradient(180deg,#1b1b20,#151519)}
+.journey-head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:11px}
+.journey-head h3{margin:2px 0 0;font-size:17px}
+.journey-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.journey-stat{min-width:0;padding:10px 7px;border:1px solid #414149;border-radius:13px;background:#202026;text-align:center}
+.journey-stat span{display:block;font-size:16px;margin-bottom:2px}.journey-stat strong{display:block;font-size:19px;line-height:1.05}.journey-stat small{display:block;margin-top:4px;color:#9b9ba5;font-size:9px;line-height:1.2}
+.journey-map-wrap{border:1px solid #3c3c44;border-radius:14px;overflow:hidden;background:#111115}
+.journey-map-title{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 11px;font-size:12px}.journey-map-title span{color:#9898a2;font-size:10px}
+.journey-map{height:245px;width:100%;border-top:1px solid #34343b}.journey-empty{padding:24px 16px 26px;border-top:1px solid #34343b;color:#9999a3;text-align:center;font-size:12px;line-height:1.45}
+@media(max-width:420px){.collector-journey{padding:11px;margin:12px 0 15px}.journey-stats{gap:6px}.journey-stat{padding:9px 4px}.journey-stat strong{font-size:17px}.journey-stat small{font-size:8px}.journey-map{height:220px}}
+
+/* The Card Map — mobile horizontal wobble guard */
+html,body{width:100%;max-width:100%;overflow-x:hidden}
+body{position:relative}
+main,.topbar{width:100%}
+dialog.dialog-card{margin:auto;max-width:calc(100% - 18px)}
+.dialog-card,.account-card,.card,.event,.saved-event,.next-show-card,.collector-journey,.show-notes,.journey-map-wrap{min-width:0}
+.dialog-card *,.account-card *{max-width:100%}
+@media(max-width:640px){
+  main{padding-left:12px;padding-right:12px}
+  .topbar{padding-left:12px;padding-right:12px}
+  dialog.dialog-card,.dialog-card,.account-card{width:calc(100% - 18px);max-width:calc(100% - 18px);margin-left:auto;margin-right:auto}
+  .account-summary,.next-show-card,.saved-event,.collector-journey,.show-notes{width:100%;max-width:100%;margin-left:auto;margin-right:auto}
+  input,select,textarea,button,a{min-width:0}
+}
+
+
+/* The Card Map — in-app show reminders */
+.reminder-card{margin-top:12px;padding:13px;border:1px solid #414149;border-radius:16px;background:#18181d}
+.reminder-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px}
+.reminder-head strong{font-size:14px}.reminder-head span{color:#9999a3;font-size:10px;font-weight:700}
+.reminder-content{display:grid;gap:7px}.reminder-empty{padding:9px 3px;color:#9b9ba5;font-size:12px;line-height:1.45}
+.reminder-item{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:9px;width:100%;padding:10px;border:1px solid #383840;border-radius:12px;background:#202026;color:#f4f4f7;text-align:left;cursor:pointer}
+.reminder-item:active{transform:translateY(1px)}.reminder-icon{font-size:18px}.reminder-copy{min-width:0}.reminder-copy strong{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px}.reminder-copy small{display:block;margin-top:3px;color:#aaaab4;font-size:10px;line-height:1.3}.reminder-arrow{color:#8f8f99;font-size:20px}
+.reminder-item.soon{border-color:#5a4d46}.reminder-item.today{border-color:#66606f}.reminder-more{padding:3px 4px 0;color:#9999a3;font-size:10px;text-align:right}
+@media(max-width:420px){.reminder-card{padding:11px}.reminder-item{padding:9px}.reminder-copy strong{font-size:11px}.reminder-copy small{font-size:9px}}
+
+
+/* Operation Gold Star */
+.favourite-toggle{width:100%;margin-top:9px;min-height:42px;border:1px solid #55535e;border-radius:12px;background:#111015;color:#c8c6cf;font-weight:800;font-size:15px}
+.favourite-toggle.active{background:#37343f;color:#fff;border-color:#777380}
+.favourites-card{margin-top:14px;padding:14px;border:1px solid #55535e;border-radius:16px;background:#0d0c11}
+.favourites-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+.favourites-head strong{font-size:18px}.favourites-head span{font-size:12px;color:#aaa7b1;font-weight:700}
+.favourites-content{display:grid;gap:8px}.favourite-empty{color:#c1bec7;line-height:1.45}
+.favourite-item{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;width:100%;padding:11px 12px;border:1px solid #55535e;border-radius:12px;background:#29272f;color:#fff;text-align:left}
+.favourite-item strong{display:block;font-size:14px}.favourite-item small{display:block;margin-top:2px;color:#b7b4bd;font-size:12px}.favourite-more{color:#aaa7b1;font-size:12px;padding:2px 4px}
+
+/* Wobble Goblin Fix v2 — lock modal/card content to the mobile viewport */
+.dialog-card,
+.account-card,
+.details-card{
+  overflow-x:hidden !important;
+  overscroll-behavior-x:none;
+}
+
+.account-card{
+  overflow-y:auto;
+}
+
+.details-card{
+  overflow-y:auto;
+}
+
+.account-card > *,
+.details-card > *,
+.details-body,
+.saved-section,
+.saved-events,
+.saved-event,
+.saved-actions,
+.show-status-picker,
+.show-notes,
+.next-show-card,
+.collector-journey,
+.reminder-card,
+.favourites-card{
+  width:100%;
+  max-width:100%;
+  min-width:0;
+}
+
+.saved-event *,
+.details-body *,
+.account-summary *,
+.next-show-card *{
+  min-width:0;
+}
+
+.saved-title,
+.saved-meta,
+.details-description,
+.details-meta,
+.account-summary,
+.favourite-item strong,
+.favourite-item small{
+  overflow-wrap:anywhere;
+  word-break:normal;
+}
+
+@media(max-width:640px){
+  .dialog-card,
+  .account-card,
+  .details-card{
+    left:auto;
+    right:auto;
+    margin-inline:auto !important;
+  }
+
+  .saved-event,
+  .next-show-card,
+  .collector-journey,
+  .reminder-card,
+  .favourites-card,
+  .show-notes{
+    margin-inline:auto;
+  }
+}
+
+/* Wobble Goblin Fix v3 — size the actual dialogs, not just their inner cards */
+#detailsDialog,
+#accountDialog,
+#settingsDialog,
+#authDialog{
+  box-sizing:border-box;
+  max-width:calc(100vw - 24px) !important;
+  margin:auto !important;
+  overflow-x:hidden !important;
+  overscroll-behavior-x:none;
+}
+
+#detailsDialog{
+  width:min(620px, calc(100vw - 24px)) !important;
+  padding:0 !important;
+}
+
+#detailsDialog .details-card{
+  position:relative;
+  width:100% !important;
+  max-width:100% !important;
+  min-width:0 !important;
+  margin:0 !important;
+  padding:20px !important;
+  overflow-x:hidden !important;
+}
+
+#detailsDialog #detailsContent{
+  width:100% !important;
+  max-width:100% !important;
+  min-width:0 !important;
+}
+
+/* v2 accidentally made every direct child 100% wide, including the X button */
+#detailsDialog #detailsCloseBtn{
+  position:absolute !important;
+  top:8px !important;
+  right:8px !important;
+  left:auto !important;
+  width:44px !important;
+  min-width:44px !important;
+  max-width:44px !important;
+  height:44px !important;
+  padding:6px !important;
+  margin:0 !important;
+  display:grid !important;
+  place-items:center !important;
+  z-index:20;
+}
+
+#accountDialog,
+#settingsDialog,
+#authDialog{
+  width:min(560px, calc(100vw - 24px)) !important;
+  padding:0 !important;
+}
+
+#accountDialog > .dialog-card,
+#settingsDialog > .dialog-card,
+#authDialog > .dialog-card{
+  width:100% !important;
+  max-width:100% !important;
+  min-width:0 !important;
+  margin:0 !important;
+}
+
+@media(max-width:640px){
+  #detailsDialog,
+  #accountDialog,
+  #settingsDialog,
+  #authDialog{
+    width:calc(100vw - 20px) !important;
+    max-width:calc(100vw - 20px) !important;
+  }
+
+  #detailsDialog .details-card{
+    padding:16px !important;
+  }
+}
+
+/* Operation Gold Star v2 — favourites become a first-class planner section */
+.saved-section > .favourites-card{margin:14px 0 18px}
+.saved-favourite-star{display:inline-block;margin-right:7px;font-size:.82em;vertical-align:.08em}
+.favourite-empty{padding:10px 4px;text-align:center;color:#aaa7b1}
+@media(max-width:420px){.favourites-head strong{font-size:16px}.favourite-item{padding:10px}.favourite-item strong{font-size:13px}}
+
+
+/* Card Preferences Phase 1 */
+.preferences-card{margin:18px 0;padding:18px;border:1px solid #56535d;border-radius:22px;background:#08070b}
+.preferences-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
+.preferences-head strong{font-size:20px}.preferences-head span{color:#aaa7b1;font-weight:700;font-size:13px}
+.preferences-copy{margin:0 0 14px;color:#aaa7b1;line-height:1.45}
+.preferences-choices{display:flex;flex-wrap:wrap;gap:9px}
+.preference-chip{position:relative;display:inline-flex;align-items:center;cursor:pointer;min-width:0}
+.preference-chip input{position:absolute;opacity:0;pointer-events:none}
+.preference-chip span{display:block;padding:10px 13px;border:1px solid #56535d;border-radius:999px;background:#16151b;color:#dedce3;font-weight:800;font-size:14px;transition:.15s ease}
+.preference-chip.selected span{background:#47444f;border-color:#8d8996;color:#fff;box-shadow:inset 0 0 0 1px #8d8996}
+.preference-chip:focus-within span{outline:2px solid currentColor;outline-offset:2px}
+.preferences-actions{display:flex;align-items:center;gap:12px;margin-top:15px;flex-wrap:wrap}
+.preferences-actions .primary{margin:0}.preferences-status{color:#aaa7b1;font-weight:700;font-size:13px}
+@media(max-width:420px){.preferences-card{padding:15px}.preferences-head strong{font-size:17px}.preference-chip span{padding:9px 11px;font-size:13px}}
+
+
+/* Card Preferences Phase 2 — verified show matching */
+.preference-match{border-color:#8d8996;background:#302d38;color:#fff;font-weight:800}
+.details-match{margin:12px 0 4px}.details-match .preference-match{display:inline-flex}
+
+
+/* Card Preferences Phase 3 — Matches My Cards discovery filter */
+.match-filter-wrap{grid-column:1/-1;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding-top:2px}
+.match-filter-btn{min-height:44px;border:1px solid #56535d;border-radius:999px;background:#16151b;color:#dedce3;padding:9px 14px;font-weight:900;cursor:pointer}
+.match-filter-btn.active{background:#47444f;border-color:#aaa6b3;color:#fff;box-shadow:inset 0 0 0 1px #8d8996}
+.match-filter-hint{font-size:12px;color:#8f8c96;line-height:1.35}
+@media(max-width:640px){.match-filter-wrap{display:grid;gap:6px}.match-filter-btn{width:100%}.match-filter-hint{text-align:center}}
+
+
+/* Scout Picks v1 — top three preference-ranked recommendations */
+.scout-picks-section{margin:26px 0 30px;padding:18px;border:1px solid #56535d;border-radius:24px;background:#0b0a0f}
+.scout-picks-head{margin-bottom:14px}
+.scout-picks-head h2{margin:3px 0 5px}
+.scout-picks-list{display:grid;gap:14px}
+.scout-picks-list .event{margin:0}
+@media(max-width:640px){.scout-picks-section{padding:14px;margin:22px 0 26px;border-radius:20px}}
+
+/* Scout Behaviour Profile v1 — transparent activity signals only; no ranking impact yet */
+.scout-signals-card{margin:14px 0 18px;padding:16px;border:1px solid #56535d;border-radius:20px;background:#0b0a0f}
+.scout-signals-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:7px}
+.scout-signals-head strong{font-size:18px}.scout-signals-head span{font-size:12px;font-weight:800;color:#aaa7b1}
+.scout-signals-copy{margin:0 0 13px;color:#aaa7b1;line-height:1.4;font-size:13px}
+.scout-signals-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.scout-signal-stat{display:grid;place-items:center;gap:2px;padding:10px 5px;border-radius:14px;background:#16151b;text-align:center}
+.scout-signal-stat span{font-size:17px}.scout-signal-stat strong{font-size:20px}.scout-signal-stat small{font-size:10px;color:#aaa7b1;font-weight:800}
+.scout-signals-label{margin:2px 0 7px;color:#8f8c96;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.06em}
+.scout-signals-categories{display:grid;gap:7px}
+.scout-category-signal{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 10px;border-radius:12px;background:#16151b}
+.scout-category-signal strong{font-size:13px}.scout-category-signal span{font-size:11px;color:#aaa7b1;text-align:right}
+.scout-signals-empty{padding:10px;color:#aaa7b1;text-align:center;font-size:12px;line-height:1.4}
+@media(max-width:420px){.scout-signals-summary{grid-template-columns:repeat(2,1fr)}.scout-category-signal{align-items:flex-start;flex-direction:column}.scout-category-signal span{text-align:left}}
+
+/* v20 — explainable Scout Picks */
+.scout-top-pick{display:inline-block;margin:0 0 10px;padding:7px 11px;border:1px solid #6a6670;border-radius:999px;font-weight:800;font-size:.9rem;background:#15131a}
+.scout-why{margin:10px 0 2px;padding:11px 13px;border-left:3px solid #77727e;border-radius:8px;background:#15141a;line-height:1.45;color:#d6d3dc;font-size:.94rem}
+.scout-why strong{color:#fff}
+
+
+/* THE CARD MAP v22 — Scout Picks mobile polish */
+.scout-picks-section{padding:16px}
+.scout-picks-head{margin-bottom:11px}
+.scout-picks-head p{margin-bottom:0;line-height:1.35}
+.scout-picks-list{gap:11px}
+.scout-picks-list .event{padding:13px}
+.scout-picks-list .event .meta{margin-top:.5rem;line-height:1.4}
+.scout-picks-list .event .tags{margin-top:.5rem}
+.scout-top-pick{margin:0 0 7px;padding:5px 9px;font-size:.78rem}
+.scout-why{margin:7px 0 0;padding:8px 10px;border-left-width:2px;border-radius:7px;line-height:1.35;font-size:.82rem}
+.scout-picks-list .event .actions{margin-top:8px;gap:6px}
+@media(max-width:640px){
+  .scout-picks-section{padding:11px;margin:18px 0 22px}
+  .scout-picks-list{gap:9px}
+  .scout-picks-list .event{padding:12px}
+  .scout-picks-list .event .actions button,.scout-picks-list .event .actions a{min-height:40px;padding:7px 9px}
+  .scout-why{font-size:.78rem;padding:7px 9px}
+}
+
+/* THE CARD MAP v24 — Plan Your Trip */
+.trip-planner{
+  margin:1rem 0 .2rem;
+  padding:12px;
+  border:1px solid #55535e;
+  border-radius:14px;
+  background:#111015;
+}
+.trip-planner-head strong{
+  display:block;
+  font-size:16px;
+}
+.trip-planner-head span{
+  display:block;
+  margin-top:2px;
+  color:#aaa7b1;
+  font-size:12px;
+  font-weight:700;
+}
+.trip-planner-actions{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:7px;
+  margin-top:10px;
+}
+.trip-planner-actions a{
+  min-height:46px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  padding:8px 6px;
+  border:1px solid #55535e;
+  border-radius:11px;
+  background:#29272f;
+  color:#fff;
+  text-decoration:none;
+  text-align:center;
+  font-size:13px;
+  font-weight:800;
+}
+.trip-planner-actions a:active{
+  transform:translateY(1px);
+}
+.trip-planner-note{
+  display:block;
+  margin-top:8px;
+  color:#8f8c97;
+  font-size:10px;
+  line-height:1.35;
+}
+@media(max-width:360px){
+  .trip-planner-actions a{font-size:12px;padding-inline:4px}
+}
+
+/* THE CARD MAP v25 — pre-launch polish */
+html{scroll-behavior:smooth}
+body{-webkit-tap-highlight-color:transparent}
+button,a,input,select,textarea{touch-action:manipulation}
+button,a{ -webkit-user-select:none; user-select:none }
+input,select,textarea{accent-color:currentColor}
+
+/* Keep keyboard navigation obvious without adding visual noise for taps. */
+:where(button,a,input,select,textarea,[tabindex]):focus-visible{
+  outline:2px solid currentColor;
+  outline-offset:3px;
+}
+
+/* Cleaner first impression and more resilient text wrapping. */
+.topbar h1,.hero h2,.event h3,.details-body h2{letter-spacing:-.015em}
+.event h3,.details-body h2,.saved-title,.next-show-title{overflow-wrap:anywhere}
+.hero p{max-width:42ch}
+#connectionBadge{opacity:.68;font-size:10px}
+
+/* Slightly clearer interaction states without changing the existing design language. */
+.actions button,.actions a,.primary,.secondary,.small-btn,.match-filter-btn,.view-btn,
+.trip-planner-actions a,.favourite-toggle,.status-choice{
+  transition:transform .12s ease,opacity .12s ease,border-color .12s ease,background .12s ease;
+}
+:where(.actions button,.actions a,.primary,.secondary,.small-btn,.match-filter-btn,.view-btn,.trip-planner-actions a,.favourite-toggle,.status-choice):active{
+  transform:translateY(1px);
+}
+button:disabled,[aria-disabled="true"]{opacity:.5;cursor:not-allowed}
+
+/* Trip planner: keep it compact and scan-friendly on phones. */
+.trip-planner{margin-top:.85rem}
+.trip-planner-head{display:grid;gap:1px}
+.trip-planner-actions a{line-height:1.15}
+
+/* Quiet launch footer — trust signal, not another dashboard card. */
+.site-footer{
+  width:100%;
+  max-width:760px;
+  margin:4px auto 0;
+  padding:8px 18px calc(24px + env(safe-area-inset-bottom));
+  display:grid;
+  gap:4px;
+  text-align:center;
+  color:#777983;
+}
+.site-footer strong{font-size:11px;letter-spacing:.08em}
+.site-footer span{font-size:11px;font-weight:750}
+.site-footer small{font-size:9.5px;line-height:1.4;opacity:.8}
+
+/* Make open dialogs feel deliberate and stop background scroll chaining. */
+dialog{overscroll-behavior:contain}
+dialog::backdrop{backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
+
+@media(max-width:640px){
+  #connectionBadge{margin-top:8px}
+  .site-footer{padding-left:14px;padding-right:14px}
+  .hero p{max-width:none}
+  .trip-planner{padding:11px}
+}
+
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}
+}
+
+/* =========================================================
+   THE CARD MAP v26 — tester feedback polish
+   Optional dark mode. Default remains the existing light mode.
+   ========================================================= */
+.theme-toggle{
+  white-space:nowrap;
+}
+html[data-theme="dark"]{
+  color-scheme:dark;
+}
+html[data-theme="dark"] body{
+  background:#0d0e12;
+  color:#f2f3f6;
+}
+html[data-theme="dark"] .hero,
+html[data-theme="dark"] .card,
+html[data-theme="dark"] .event,
+html[data-theme="dark"] .saved-event,
+html[data-theme="dark"] .next-show-card,
+html[data-theme="dark"] .dialog-card,
+html[data-theme="dark"] dialog{
+  background:#17181e;
+  color:#f2f3f6;
+  border-color:#30323b;
+}
+html[data-theme="dark"] .account-summary,
+html[data-theme="dark"] .future-card,
+html[data-theme="dark"] .empty,
+html[data-theme="dark"] .empty-saved{
+  background:#13141a;
+  color:#e8e9ed;
+  border-color:#30323b;
+}
+html[data-theme="dark"] .account-avatar{
+  background:#202129;
+  border-color:#383a44;
+}
+html[data-theme="dark"] .eyebrow,
+html[data-theme="dark"] .muted,
+html[data-theme="dark"] .meta,
+html[data-theme="dark"] .status,
+html[data-theme="dark"] .section-head span,
+html[data-theme="dark"] .hero p,
+html[data-theme="dark"] .saved-event .saved-meta,
+html[data-theme="dark"] .future-card span,
+html[data-theme="dark"] .next-show-meta,
+html[data-theme="dark"] .saved-group-label,
+html[data-theme="dark"] label span,
+html[data-theme="dark"] .location-or{
+  color:#b7bac4;
+}
+html[data-theme="dark"] input,
+html[data-theme="dark"] select{
+  background:#111217;
+  color:#f2f3f6;
+  border-color:#3a3c46;
+}
+html[data-theme="dark"] input::placeholder{
+  color:#8f929d;
+}
+html[data-theme="dark"] input:focus,
+html[data-theme="dark"] select:focus{
+  border-color:#777b89;
+}
+html[data-theme="dark"] .small-btn,
+html[data-theme="dark"] .secondary,
+html[data-theme="dark"] .view-btn{
+  background:#24262e;
+  color:#f2f3f6;
+  border-color:#3a3c46;
+}
+html[data-theme="dark"] .primary{
+  background:#f1f2f5;
+  color:#121318;
+}
+html[data-theme="dark"] .badge,
+html[data-theme="dark"] .tag{
+  background:#262832;
+  color:#eceef3;
+}
+html[data-theme="dark"] .saved{
+  background:#302744!important;
+}
+html[data-theme="dark"] .distance-chip{
+  background:#172636;
+  border-color:#274663;
+}
+html[data-theme="dark"] .scout-picks-section{
+  border-color:#30323b;
+}
+html[data-theme="dark"] .preference-match{
+  background:#302a16;
+  border-color:#5f5125;
+}
+html[data-theme="dark"] .match-filter-btn{
+  background:#24262e;
+  color:#f2f3f6;
+  border-color:#3a3c46;
+}
+html[data-theme="dark"] .match-filter-btn.active,
+html[data-theme="dark"] .match-filter-btn[aria-pressed="true"]{
+  background:#f1f2f5;
+  color:#121318;
+}
+html[data-theme="dark"] .shows-map,
+html[data-theme="dark"] .journey-map{
+  background:#22242b;
+}
+html[data-theme="dark"] a{
+  color:inherit;
+}
+html[data-theme="dark"] dialog::backdrop{
+  background:rgba(0,0,0,.72);
+}
+@media (max-width:520px){
+  .theme-toggle{
+    padding:7px 9px;
+  }
+  .top-actions{
+    gap:2px;
+  }
+}
+
+/* =========================================================
+   THE CARD MAP v27 — optional verified show artwork
+   Applied only when an event has a non-empty image_url.
+   ========================================================= */
+.event.has-show-artwork,
+.saved-event.has-show-artwork,
+.next-show-card.has-show-artwork{
+  position:relative;
+  overflow:hidden;
+  isolation:isolate;
+  background:#17181e;
+  color:#fff;
+  min-height:190px;
+}
+.event.has-show-artwork::before,
+.saved-event.has-show-artwork::before,
+.next-show-card.has-show-artwork::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:-2;
+  background-image:var(--show-artwork);
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+  transform:scale(1.01);
+}
+.event.has-show-artwork::after,
+.saved-event.has-show-artwork::after,
+.next-show-card.has-show-artwork::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+  background:
+    linear-gradient(180deg, rgba(7,8,12,.30) 0%, rgba(7,8,12,.72) 46%, rgba(7,8,12,.96) 100%);
+}
+.event.has-show-artwork,
+.event.has-show-artwork h3,
+.event.has-show-artwork .meta,
+.event.has-show-artwork .muted,
+.saved-event.has-show-artwork,
+.saved-event.has-show-artwork .saved-meta,
+.next-show-card.has-show-artwork,
+.next-show-card.has-show-artwork .next-show-meta{
+  color:#fff;
+  text-shadow:0 1px 2px rgba(0,0,0,.72);
+}
+.event.has-show-artwork .tag,
+.event.has-show-artwork .badge,
+.event.has-show-artwork .distance-chip,
+.saved-event.has-show-artwork .tag,
+.next-show-card.has-show-artwork .tag{
+  text-shadow:none;
+  backdrop-filter:blur(7px);
+  -webkit-backdrop-filter:blur(7px);
+}
+.event.has-show-artwork button,
+.saved-event.has-show-artwork button,
+.next-show-card.has-show-artwork button{
+  position:relative;
+  z-index:2;
+}
+@media (hover:hover){
+  .event.has-show-artwork::before,
+  .saved-event.has-show-artwork::before,
+  .next-show-card.has-show-artwork::before{
+    transition:transform .25s ease;
+  }
+  .event.has-show-artwork:hover::before,
+  .saved-event.has-show-artwork:hover::before,
+  .next-show-card.has-show-artwork:hover::before{
+    transform:scale(1.035);
+  }
+}
+@media (prefers-reduced-motion:reduce){
+  .event.has-show-artwork::before,
+  .saved-event.has-show-artwork::before,
+  .next-show-card.has-show-artwork::before{
+    transition:none;
+  }
+}
+
+
+/* v27 Card Map Identity Polish — original visual treatment, no third-party artwork */
+.event{position:relative;overflow:hidden;isolation:isolate}
+.event::before{content:"";position:absolute;inset:0;z-index:-2;pointer-events:none;opacity:.55;
+background:radial-gradient(circle at 88% 18%,rgba(77,94,255,.12) 0 2px,transparent 3px),
+linear-gradient(135deg,transparent 0 67%,rgba(77,94,255,.055) 67% 68%,transparent 68% 100%);
+background-size:auto,32px 32px}
+.event::after{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;z-index:3;pointer-events:none;
+background:linear-gradient(180deg,#ef3340 0 34%,#fff 34% 66%,#111827 66% 100%);opacity:.9}
+.event .tcm-card-stamp{display:flex;align-items:center;gap:7px;width:max-content;max-width:100%;
+margin:0 0 8px;padding:4px 8px;border:1px solid rgba(77,94,255,.16);border-radius:999px;
+background:rgba(255,255,255,.72);font-size:.72rem;font-weight:800;letter-spacing:.04em;
+text-transform:uppercase;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.event .tcm-card-stamp .tcm-date{font-weight:900}
+.event .tcm-card-stamp .tcm-sep{opacity:.45}
+.event.tcm-scout-card{box-shadow:0 10px 30px rgba(38,45,90,.10)}
+html[data-theme="dark"] .event::before{opacity:.72}
+html[data-theme="dark"] .event .tcm-card-stamp{background:rgba(16,18,26,.72);border-color:rgba(255,255,255,.12);color:#fff}
+@media(max-width:640px){.event::after{width:3px}.event .tcm-card-stamp{margin-bottom:6px;padding:3px 7px;font-size:.66rem}}
+
+
+/* =========================================================
+   THE CARD MAP v28 — responsive brand hero banner
+   ========================================================= */
+.brand-banner{
+  width:100%;
+  margin:0 0 18px;
+  overflow:hidden;
+  border:1px solid rgba(120,124,140,.32);
+  border-radius:24px;
+  background:#080a0f;
+  box-shadow:0 16px 42px rgba(0,0,0,.16);
+}
+.brand-banner img{
+  display:block;
+  width:100%;
+  height:auto;
+  aspect-ratio:1978 / 736;
+  object-fit:cover;
+  object-position:center;
+}
+html[data-theme="dark"] .brand-banner{
+  border-color:rgba(255,255,255,.18);
+  box-shadow:0 18px 48px rgba(0,0,0,.34);
+}
+@media (max-width:720px){
+  .brand-banner{
+    margin-bottom:14px;
+    border-radius:18px;
+  }
+  .brand-banner img{
+    height:180px;
+    width:100%;
+    object-fit:cover;
+    object-position:50% 50%;
+  }
+}
+@media (max-width:430px){
+  .brand-banner img{
+    height:156px;
+    object-position:50% 50%;
+  }
+}
+@media (prefers-reduced-motion:reduce){
+  .brand-banner{scroll-behavior:auto}
+}
+
+
+/* THE CARD MAP v30.2 — feature highlights, deliberately non-button-like */
+.feature-ribbon{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:12px;
+  margin:-4px 4px 20px;
+  padding:0 2px;
+}
+.feature-highlight{
+  min-width:0;
+  padding:5px 8px 7px;
+  text-align:center;
+  border-bottom:2px solid rgba(196,24,32,.34);
+}
+.feature-highlight strong{
+  display:block;
+  font-size:.78rem;
+  line-height:1.2;
+  font-weight:850;
+}
+.feature-highlight small{
+  display:block;
+  margin-top:4px;
+  font-size:.67rem;
+  line-height:1.2;
+  color:#737680;
+  font-weight:650;
+}
+html[data-theme="dark"] .feature-highlight{border-bottom-color:rgba(235,28,36,.42)}
+html[data-theme="dark"] .feature-highlight strong{color:#fff}
+html[data-theme="dark"] .feature-highlight small{color:#aaaab4}
+@media (max-width:720px){
+  .feature-ribbon{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 18px;margin:0 12px 18px}
+  .feature-highlight{padding:4px 4px 7px}
+  .feature-highlight strong{font-size:.78rem}
+  .feature-highlight small{font-size:.66rem}
+}
+
+/* v30.2 — Card Map region picker. Keeps the real select for app logic,
+   while avoiding Samsung's oversized native select popup. */
+.region-native-select{
+  position:absolute!important;
+  width:1px!important;height:1px!important;
+  padding:0!important;margin:-1px!important;
+  overflow:hidden!important;clip:rect(0,0,0,0)!important;
+  white-space:nowrap!important;border:0!important;
+}
+.region-picker-btn{
+  width:100%;min-height:46px;padding:10px 42px 10px 12px;
+  border:1px solid #d9d9e1;border-radius:12px;background:#fff;color:#17181c;
+  text-align:left;position:relative;cursor:pointer;
+}
+.region-picker-btn::after{content:'⌄';position:absolute;right:14px;top:50%;transform:translateY(-55%);color:#747781}
+.region-picker-btn:focus-visible{outline:3px solid rgba(95,99,112,.3);outline-offset:2px}
+.region-picker-dialog{border:0;padding:0;background:transparent;max-width:none;width:100%;height:100%;}
+.region-picker-dialog::backdrop{background:rgba(0,0,0,.58)}
+.region-picker-panel{position:fixed;left:12px;right:12px;bottom:12px;max-width:720px;margin:0 auto;background:#fff;color:#17181c;border:1px solid #dddde5;border-radius:20px;padding:16px;box-shadow:0 18px 50px rgba(0,0,0,.3)}
+.region-picker-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+.region-picker-head strong{font-size:1.05rem}
+.region-picker-close{border:0;background:transparent;font-size:1.25rem;padding:8px;cursor:pointer}
+.region-picker-options{display:grid;gap:7px;max-height:min(58vh,430px);overflow:auto}
+.region-picker-option{width:100%;border:1px solid #e1e1e7;border-radius:12px;background:#f6f6f9;color:#202127;padding:12px 14px;text-align:left;cursor:pointer;font-weight:750}
+.region-picker-option[aria-checked="true"]{border-color:#c41820;box-shadow:inset 3px 0 0 #c41820;background:#fff}
+html[data-theme="dark"] .region-picker-btn{background:#111217;border-color:#444650;color:#f5f5f7}
+html[data-theme="dark"] .region-picker-panel{background:#1b1c21;color:#fff;border-color:#444650}
+html[data-theme="dark"] .region-picker-option{background:#111217;color:#f5f5f7;border-color:#3d3f48}
+html[data-theme="dark"] .region-picker-option[aria-checked="true"]{background:#17181d;border-color:#e02028}
+/* THE CARD MAP v28.2 — dedicated mobile hero asset */
+.brand-banner picture{
+  display:block;
+}
+@media (max-width:720px){
+  .brand-banner img{
+    width:100%;
+    height:auto;
+    aspect-ratio:1158 / 388;
+    object-fit:cover;
+    object-position:center;
+  }
+}
+
+
+/* THE CARD MAP v29 — installable PWA */
+.install-app-btn{
+  border-color:rgba(225,20,32,.45);
+}
+.install-dialog-card{
+  max-width:440px;
+}
+@media (max-width:520px){
+  .top-actions{
+    gap:7px;
+  }
+  .install-app-btn{
+    padding-inline:11px;
+  }
+}
+
+
+/* v29.1 — install trust polish */
+#installInstructions{
+  line-height:1.55;
+}
+#installInstructions strong{
+  color:inherit;
+}
+
+
+/* THE CARD MAP v30 — in-app trip map */
+.trip-inline-map{
+  width:100%;
+  height:240px;
+  margin:12px 0 10px;
+  border:1px solid rgba(120,124,140,.28);
+  border-radius:16px;
+  overflow:hidden;
+  background:#e9e9ec;
+}
+.trip-map-tools{
+  display:flex;
+  margin:0 0 10px;
+}
+.trip-locate-btn{
+  width:100%;
+  min-height:42px;
+  border:1px solid rgba(225,20,32,.38);
+  border-radius:13px;
+  background:transparent;
+  color:inherit;
+  font:inherit;
+  font-weight:800;
+}
+.trip-locate-btn:disabled{opacity:.65}
+.trip-map-unavailable{
+  margin:12px 0 10px;
+  padding:14px;
+  border:1px dashed rgba(120,124,140,.35);
+  border-radius:14px;
+  text-align:center;
+}
+.trip-inline-map .leaflet-popup-content-wrapper,
+.trip-inline-map .leaflet-popup-tip{
+  color:#111;
+}
+@media (max-width:520px){
+  .trip-inline-map{height:210px}
+}
+
+
+/* THE CARD MAP v30.1 — trip routing + action-box polish */
+.trip-map-tools{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+}
+.trip-route-btn{
+  width:100%;
+  min-height:42px;
+  border:1px solid rgba(225,20,32,.38);
+  border-radius:13px;
+  background:transparent;
+  color:inherit;
+  font:inherit;
+  font-weight:800;
+}
+.trip-route-btn:disabled{opacity:.65}
+.trip-route-summary{
+  display:grid;
+  gap:2px;
+  margin:0 0 10px;
+  padding:12px 14px;
+  border:1px solid rgba(225,20,32,.32);
+  border-radius:14px;
+  background:rgba(225,20,32,.06);
+}
+.trip-route-summary strong{font-size:.98rem}
+.trip-route-summary span{font-weight:700}
+.trip-route-summary small{opacity:.72}
+
+/* Treat every show action as one visual family, whether it is a button or link. */
+.card-actions a,
+.details-actions a,
+.card-actions button,
+.details-actions button{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:40px;
+  padding:9px 13px;
+  border:1px solid rgba(120,124,140,.32);
+  border-radius:12px;
+  background:transparent;
+  color:inherit;
+  font:inherit;
+  font-weight:800;
+  line-height:1.1;
+  text-decoration:none;
+}
+.card-actions a:hover,
+.details-actions a:hover,
+.card-actions button:hover,
+.details-actions button:hover{
+  border-color:rgba(225,20,32,.48);
+}
+@media (max-width:420px){
+  .trip-map-tools{grid-template-columns:1fr}
+}
+
+/* THE CARD MAP v30.4 — keep the dark trip planner readable in Light mode */
+.trip-planner,
+.trip-planner-head strong,
+.trip-locate-btn,
+.trip-route-btn,
+.trip-route-summary{
+  color:#fff;
+}
+.trip-planner-head span,
+.trip-planner-note,
+.trip-route-summary small{
+  color:#aaa7b1;
+}
+
+
+/* THE CARD MAP v30.5 — account deletion */
+.danger-zone{margin-top:18px;padding:16px;border:1px solid rgba(225,20,32,.34);border-radius:14px;background:rgba(225,20,32,.06)}
+.danger-zone strong{display:block;margin-bottom:5px}
+.danger-zone p{margin:0 0 12px;color:var(--muted,#777);font-size:.92rem;line-height:1.45}
+.danger-button{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:10px 14px;border:1px solid #c51420;border-radius:12px;background:#c51420;color:#fff;font:inherit;font-weight:800;cursor:pointer}
+.danger-button:disabled{opacity:.45;cursor:not-allowed}
+.delete-account-card{max-width:520px}
+.delete-confirm-label{display:grid;gap:7px;margin:16px 0}
+.delete-confirm-label input{width:100%;box-sizing:border-box}
+.dialog-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;margin-top:16px}
+
+/* THE CARD MAP — minimal light-mode contrast repair
+   Only fixes text inside panels that deliberately stay dark in Light mode.
+   No layout, sizing, spacing, backgrounds or component structure changed. */
+html:not([data-theme="dark"]) .favourites-head strong,
+html:not([data-theme="dark"]) .scout-signals-head strong,
+html:not([data-theme="dark"]) .scout-signal-stat strong,
+html:not([data-theme="dark"]) .scout-category-signal strong,
+html:not([data-theme="dark"]) .journey-head h3,
+html:not([data-theme="dark"]) .journey-stat strong,
+html:not([data-theme="dark"]) .journey-map-title strong {
+  color:#f4f4f7;
+}
+
