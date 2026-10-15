@@ -42,7 +42,7 @@
       // The public Nominatim endpoint is a best-effort lookup, not a guarantee.
       // A postcode result is never treated as an exact venue result.
       try {
-        const params = new URLSearchParams({ q: query, format: "jsonv2", limit: "3", addressdetails: "1", countrycodes: "gb" });
+        const params = new URLSearchParams({ q: query, format: "jsonv2", limit: "5", addressdetails: "1", countrycodes: "gb" });
         const response = await fetch("https://nominatim.openstreetmap.org/search?" + params, { headers: { Accept: "application/json" } });
         if (response.ok) {
           const results = await response.json();
@@ -146,14 +146,17 @@
         maxZoom: 18,
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       }).addTo(tripMap);
-      L.marker(destination).addTo(tripMap)
-        .bindPopup(venueExact ? "Venue location (verify before travelling)" : "Approximate postcode centre — NOT verified venue")
-        .openPopup();
+      const venueMarker = L.marker(destination).addTo(tripMap);
+      // Do not auto-open an oversized popup over the small mobile map.
+      venueMarker.bindPopup(venueExact
+        ? "Venue location (verify before travelling)"
+        : "Approximate postcode centre (not the venue entrance)", { maxWidth: 200 });
       setTimeout(() => tripMap?.invalidateSize(), 100);
-      // Route to a matched venue or clearly labelled approximate postcode centre. Never use a town centre.
+      // Showing the user's position is safe with an approximate pin;
+      // routing to that pin would imply a false venue destination.
       if (navigator.geolocation) {
-        locateBtn.hidden = false;
-        routeBtn.hidden = false;
+        locateBtn.style.removeProperty("display");
+        if (venueExact) routeBtn.style.removeProperty("display");
       }
     }
 
@@ -163,8 +166,8 @@
     let myCoords = null;
     let routeLayer = null;
 
-    if (locateBtn) locateBtn.hidden = true;
-    if (routeBtn) routeBtn.hidden = true;
+    if (locateBtn) locateBtn.style.setProperty("display", "none", "important");
+    if (routeBtn) routeBtn.style.setProperty("display", "none", "important");
     loadVenue().catch(() => { statusElement.textContent = "📍 Venue lookup unavailable. Open in Maps for directions."; });
 
     async function getMyLocation() {
@@ -201,10 +204,10 @@
     routeBtn?.addEventListener("click", async () => {
       routeBtn.disabled = true;
       routeBtn.innerHTML = '⌛ <span>Finding route…</span>';
-      if (routeSummary) routeSummary.hidden = true;
+      if (routeSummary) { routeSummary.hidden = true; routeSummary.style.setProperty("display", "none", "important"); }
 
       try {
-        if (!destination) throw new Error("Destination unavailable");
+        if (!destination || !venueExact) throw new Error("Verified venue destination unavailable");
         const mine = await getMyLocation();
         const url = `https://router.project-osrm.org/route/v1/driving/${mine[1]},${mine[0]};${destination[1]},${destination[0]}?overview=full&geometries=geojson&steps=false`;
         const response = await fetch(url);
@@ -230,14 +233,16 @@
           : `${mins} min`;
 
         if (routeSummary) {
-          routeSummary.innerHTML = `<strong>🚗 ${miles.toFixed(miles < 10 ? 1 : 0)} miles</strong><span>Approx. ${time} driving</span><small>${venueExact ? "Venue match" : "Route to approximate postcode centre, not confirmed entrance"} · OSRM / OpenStreetMap</small>`;
+          routeSummary.innerHTML = `<strong>🚗 ${miles.toFixed(miles < 10 ? 1 : 0)} miles</strong><span>Approx. ${time} driving</span><small>Venue match · OSRM / OpenStreetMap</small>`;
           routeSummary.hidden = false;
+          routeSummary.style.removeProperty("display");
         }
         routeBtn.innerHTML = '✓ <span>Route shown</span>';
       } catch (_) {
         if (routeSummary) {
           routeSummary.innerHTML = '<strong>Route unavailable right now</strong><span>Please try again shortly.</span>';
           routeSummary.hidden = false;
+          routeSummary.style.removeProperty("display");
         }
         routeBtn.innerHTML = '🚗 <span>Route me there</span>';
       }
