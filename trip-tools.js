@@ -154,7 +154,7 @@
       }
       statusElement.textContent = venueExact
         ? "📍 Venue matched in OpenStreetMap (entrance not verified)"
-        : "⚠️ Approximate postcode location only — venue not verified. Use Open in Maps for directions.";
+        : "⚠️ Approximate postcode location only — route ends near the postcode, not a verified venue entrance.";
       mapElement.style.display = "";
       if (tripMap) {
         try { tripMap.remove(); } catch (_) {}
@@ -172,25 +172,22 @@
         ? "Venue location (verify before travelling)"
         : "Approximate postcode centre (not the venue entrance)", { maxWidth: 200 });
       setTimeout(() => tripMap?.invalidateSize(), 100);
-      // Showing the user's position is safe with an approximate pin;
-      // routing to that pin would imply a false venue destination.
       if (navigator.geolocation) {
         locateBtn.style.removeProperty("display");
-        if (venueExact && routeBtn && !routeBtn.isConnected) {
-          planner.querySelector(".trip-map-tools")?.appendChild(routeBtn);
-        }
+        routeBtn.style.removeProperty("display");
+        routeBtn.disabled = false;
       }
     }
 
     const locateBtn = planner.querySelector(".trip-locate-btn");
     const routeBtn = planner.querySelector(".trip-route-btn");
     const routeSummary = planner.querySelector(".trip-route-summary");
-    if (routeSummary) routeSummary.remove();
+    if (routeSummary) routeSummary.hidden = true;
     let myCoords = null;
     let routeLayer = null;
 
     if (locateBtn) locateBtn.style.setProperty("display", "none", "important");
-    if (routeBtn) routeBtn.remove();
+    if (routeBtn) routeBtn.style.setProperty("display", "none", "important");
     loadVenue().catch(() => { statusElement.textContent = "📍 Venue lookup unavailable. Open in Maps for directions."; });
 
     async function getMyLocation() {
@@ -227,10 +224,10 @@
     routeBtn?.addEventListener("click", async () => {
       routeBtn.disabled = true;
       routeBtn.innerHTML = '⌛ <span>Finding route…</span>';
-      if (routeSummary) { routeSummary.hidden = true; routeSummary.remove(); }
+      if (routeSummary) routeSummary.hidden = true;
 
       try {
-        if (!destination || !venueExact) throw new Error("Verified venue destination unavailable");
+        if (!destination) throw new Error("Destination unavailable");
         const mine = await getMyLocation();
         const url = `https://router.project-osrm.org/route/v1/driving/${mine[1]},${mine[0]};${destination[1]},${destination[0]}?overview=full&geometries=geojson&steps=false`;
         const response = await fetch(url);
@@ -256,16 +253,16 @@
           : `${mins} min`;
 
         if (routeSummary) {
-          routeSummary.innerHTML = `<strong>🚗 ${miles.toFixed(miles < 10 ? 1 : 0)} miles</strong><span>Approx. ${time} driving</span><small>Venue match · OSRM / OpenStreetMap</small>`;
+          routeSummary.innerHTML = `<strong>🚗 ${miles.toFixed(miles < 10 ? 1 : 0)} miles</strong><span>Approx. ${time} driving</span><small>${venueExact ? "Venue location matched; entrance not verified" : "⚠️ Route ends at approximate postcode centre, NOT the venue entrance. Verify with Open in Maps before travelling."} · OSRM / OpenStreetMap</small>`;
           routeSummary.hidden = false;
-          planner.querySelector(".trip-map-tools")?.after(routeSummary);
+
         }
         routeBtn.innerHTML = '✓ <span>Route shown</span>';
       } catch (_) {
         if (routeSummary) {
           routeSummary.innerHTML = '<strong>Route unavailable right now</strong><span>Please try again shortly.</span>';
           routeSummary.hidden = false;
-          planner.querySelector(".trip-map-tools")?.after(routeSummary);
+
         }
         routeBtn.innerHTML = '🚗 <span>Route me there</span>';
       }
