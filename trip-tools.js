@@ -20,9 +20,57 @@
     return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
   }
 
-  function eventCoords(event) {
-    if (typeof coordsForEvent === "function") return coordsForEvent(event);
-    return null;
+  // Never use city-centre or postcode-area coordinates as venue destinations.
+  // First look for the actual venue in OpenStreetMap, then use a postcode
+  // centroid only as a clearly labelled approximate fallback.
+  const venueCache = new Map();
+  function fullPostcode(event) {
+    const text = [event.postcode, event.venue, event.address].filter(Boolean).join(" ");
+    const match = text.toUpperCase().match(/\b([A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2})\b/);
+    return match ? match[1].replace(/\s+/g, "").replace(/(.{3})$/, " $1") : "";
+  }
+  function venueQuery(event) {
+    return [event.venue || event.address, event.city || event.location, fullPostcode(event), "UK"]
+      .filter(Boolean).join(", ");
+  }
+  async function eventCoords(event) {
+    const postcode = fullPostcode(event);
+    const query = venueQuery(event);
+    if (!query || (!postcode && !(event.venue || event.address))) return null;
+    if (venueCache.has(query)) return venueCache.get(query);
+    const pending = (async () => {
+      // The public Nominatim endpoint is a best-effort lookup, not a guarantee.
+      // A postcode result is never treated as an exact venue result.
+      try {
+        const params = new URLSearchParams({ q: query, format: "jsonv2", limit: "3", addressdetails: "1", countrycodes: "gb" });
+        const response = await fetch("https://nominatim.openstreetmap.org/search?" + params, { headers: { Accept: "application/json" } });
+        if (response.ok) {
+          const results = await response.json();
+          const venue = String(event.venue || event.address || "").toLowerCase();
+          const meaningful = venue.replace(/\b[a-z]{1,2}\d[a-z\d]?\s*\d[a-z]{2}\b/gi, "").replace(/[^a-z0-9 ]/g, " ").trim();
+          const words = meaningful.split(/\s+/).filter(w => w.length >= 4 && !["road","street","centre","center","arena","hotel","hall"].includes(w));
+          const match = results.find(item => {
+            const label = String(item.display_name || "").toLowerCase();
+            return words.length && words.some(w => label.includes(w));
+          });
+          if (match && Number.isFinite(+match.lat) && Number.isFinite(+match.lon))
+            return { coords: [+match.lat, +match.lon], exact: true, source: "OpenStreetMap venue lookup" };
+        }
+      } catch (_) {}
+      if (postcode) {
+        try {
+          const response = await fetch("https://api.postcodes.io/postcodes/" + encodeURIComponent(postcode));
+          if (response.ok) {
+            const data = await response.json();
+            if (data.result && Number.isFinite(data.result.latitude) && Number.isFinite(data.result.longitude))
+              return { coords: [data.result.latitude, data.result.longitude], exact: false, source: "Postcode centre (approximate)" };
+          }
+        } catch (_) {}
+      }
+      return null;
+    })();
+    venueCache.set(query, pending);
+    return pending;
   }
 
   function addTripPlanner(key) {
@@ -36,9 +84,9 @@
     const actions = detailsBody.querySelector(".details-actions");
     if (!actions) return;
 
-    const coords = eventCoords(event);
     const mapId = `trip-map-${String(key).replace(/[^a-z0-9_-]/gi, "-")}`;
 
+    if (tripMap) { try { tripMap.remove(); } catch (_) {} tripMap = null; }
     const planner = document.createElement("section");
     planner.className = "trip-planner trip-planner-v30";
     planner.setAttribute("aria-label", "Plan your trip");
@@ -49,8 +97,8 @@
           <span>Venue map inside THE CARD MAP</span>
         </div>
       </div>
-      ${coords ? `<div id="${mapId}" class="trip-inline-map" aria-label="Map showing the card show area"></div>` :
-        `<div class="trip-map-unavailable">📍 Map location unavailable for this show.</div>`}
+      <div id="${mapId}" class="trip-inline-map" aria-label="Venue map" style="display:none"></div>
+      <div class="trip-map-unavailable">📍 Looking up the venue location…</div>
       <div class="trip-map-tools">
         <button type="button" class="trip-locate-btn">◎ <span>Show my location</span></button>
         <button type="button" class="trip-route-btn">🚗 <span>Route me there</span></button>
@@ -66,32 +114,47 @@
 
     actions.parentNode.insertBefore(planner, actions);
 
-    if (coords && window.L) {
-      setTimeout(() => {
-        if (tripMap) {
-          try { tripMap.remove(); } catch (_) {}
-          tripMap = null;
-        }
-        const el = document.getElementById(mapId);
-        if (!el) return;
+    let destination = null;
+    let venueExact = false;
+    const mapElement = planner.querySelector(".trip-inline-map");
+    const statusElement = planner.querySelector(".trip-map-unavailable");
 
-        tripMap = L.map(el, {
-          scrollWheelZoom: false,
-          zoomControl: true,
-          attributionControl: true
-        }).setView(coords, 13);
-
-        L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-          maxZoom: 18,
-          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(tripMap);
-
-        L.marker(coords).addTo(tripMap)
-          .bindPopup(`<strong>${String(event.name || "Card show").replace(/[<>&"]/g, "")}</strong>`)
-          .openPopup();
-
-        setTimeout(() => tripMap?.invalidateSize(), 100);
-      }, 80);
+    async function loadVenue() {
+      const result = await eventCoords(event);
+      if (!planner.isConnected) return;
+      if (!result) {
+        statusElement.textContent = "📍 Venue map unavailable. Use Open in Maps to find the address.";
+        return;
+      }
+      destination = result.coords;
+      venueExact = result.exact;
+      if (!window.L) {
+        statusElement.textContent = "📍 Map tiles unavailable. Use Open in Maps.";
+        return;
+      }
+      statusElement.textContent = venueExact
+        ? "📍 Venue location found via OpenStreetMap"
+        : "⚠️ Approximate postcode location only — not the venue entrance.";
+      mapElement.style.display = "";
+      if (tripMap) {
+        try { tripMap.remove(); } catch (_) {}
+        tripMap = null;
+      }
+      tripMap = L.map(mapElement, { scrollWheelZoom: false, zoomControl: true, attributionControl: true })
+        .setView(destination, venueExact ? 16 : 14);
+      L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 18,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      }).addTo(tripMap);
+      L.marker(destination).addTo(tripMap)
+        .bindPopup(venueExact ? "Venue location (verify before travelling)" : "Approximate postcode centre — NOT verified venue")
+        .openPopup();
+      setTimeout(() => tripMap?.invalidateSize(), 100);
+      // Route to a matched venue or clearly labelled approximate postcode centre. Never use a town centre.
+      if (navigator.geolocation) {
+        locateBtn.hidden = false;
+        routeBtn.hidden = false;
+      }
     }
 
     const locateBtn = planner.querySelector(".trip-locate-btn");
@@ -100,11 +163,9 @@
     let myCoords = null;
     let routeLayer = null;
 
-    if (!coords || !navigator.geolocation) {
-      if (locateBtn) locateBtn.hidden = true;
-      if (routeBtn) routeBtn.hidden = true;
-      return;
-    }
+    if (locateBtn) locateBtn.hidden = true;
+    if (routeBtn) routeBtn.hidden = true;
+    loadVenue().catch(() => { statusElement.textContent = "📍 Venue lookup unavailable. Open in Maps for directions."; });
 
     async function getMyLocation() {
       if (myCoords) return myCoords;
@@ -122,17 +183,17 @@
 
       try {
         const mine = await getMyLocation();
-        if (tripMap) {
+        if (tripMap && destination) {
           L.circleMarker(mine, {
             radius: 8,
             weight: 3,
             fillOpacity: .9
           }).addTo(tripMap).bindPopup("You are here");
-          tripMap.fitBounds(L.latLngBounds([coords, mine]), { padding: [28, 28], maxZoom: 13 });
+          tripMap.fitBounds(L.latLngBounds([destination, mine]), { padding: [28, 28], maxZoom: 13 });
         }
         locateBtn.innerHTML = '✓ <span>Location shown</span>';
       } catch (_) {
-        locateBtn.innerHTML = '◎ <span>Show my location</span>';
+        locateBtn.innerHTML = '◎ <span>Location unavailable — retry</span>';
       }
       locateBtn.disabled = false;
     });
@@ -143,8 +204,9 @@
       if (routeSummary) routeSummary.hidden = true;
 
       try {
+        if (!destination) throw new Error("Destination unavailable");
         const mine = await getMyLocation();
-        const url = `https://router.project-osrm.org/route/v1/driving/${mine[1]},${mine[0]};${coords[1]},${coords[0]}?overview=full&geometries=geojson&steps=false`;
+        const url = `https://router.project-osrm.org/route/v1/driving/${mine[1]},${mine[0]};${destination[1]},${destination[0]}?overview=full&geometries=geojson&steps=false`;
         const response = await fetch(url);
         if (!response.ok) throw new Error("Route service unavailable");
         const data = await response.json();
@@ -168,7 +230,7 @@
           : `${mins} min`;
 
         if (routeSummary) {
-          routeSummary.innerHTML = `<strong>🚗 ${miles.toFixed(miles < 10 ? 1 : 0)} miles</strong><span>Approx. ${time} driving</span><small>Route: OSRM / OpenStreetMap data</small>`;
+          routeSummary.innerHTML = `<strong>🚗 ${miles.toFixed(miles < 10 ? 1 : 0)} miles</strong><span>Approx. ${time} driving</span><small>${venueExact ? "Venue match" : "Route to approximate postcode centre, not confirmed entrance"} · OSRM / OpenStreetMap</small>`;
           routeSummary.hidden = false;
         }
         routeBtn.innerHTML = '✓ <span>Route shown</span>';

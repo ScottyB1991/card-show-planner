@@ -35,7 +35,7 @@ const PLACE_CENTRES = {
   "leeds": [53.8008, -1.5491],
   "esher": [51.3692, -0.3656],
   "watford": [51.6565, -0.3903],
-  "hull": [53.7676, -0.3274],
+  "hull": [53.7443, -0.3325],
   "derby": [52.9225, -1.4746],
   "stowmarket": [52.1880, 0.9977],
   "sheffield": [53.3811, -1.4701],
@@ -71,6 +71,7 @@ const PLACE_CENTRES = {
   "bristol": [51.4545, -2.5879],
   "ashford": [51.1465, 0.8750],
   "coventry": [52.4068, -1.5197],
+  "cardiff": [51.4816, -3.1791],
   "maidstone": [51.2704, 0.5227],
   "twickenham": [51.4449, -0.3370]
 };
@@ -96,7 +97,7 @@ const POSTCODE_AREA_CENTRES = {
   "LE": PLACE_CENTRES["leicester"], "SN": PLACE_CENTRES["swindon"],
   "LU": PLACE_CENTRES["luton"], "CO": PLACE_CENTRES["colchester"],
   "BS": PLACE_CENTRES["bristol"], "TN": PLACE_CENTRES["ashford"],
-  "CV": PLACE_CENTRES["coventry"], "ME": PLACE_CENTRES["maidstone"],
+  "CV": PLACE_CENTRES["coventry"], "CF": PLACE_CENTRES["cardiff"], "ME": PLACE_CENTRES["maidstone"],
   "TW": PLACE_CENTRES["twickenham"]
 };
 
@@ -109,7 +110,47 @@ function postcodeArea(value) {
   return m ? m[1] : "";
 }
 
+// UK postcode positions are more precise than town centres, but remain
+// approximate: they must not be represented as verified venue entrances.
+const postcodeCoordinates = new Map();
+function fullEventPostcode(e) {
+  const source = [e.postcode, e.address, e.venue].filter(Boolean).join(" ").toUpperCase();
+  const match = source.match(/\b([A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2})\b/);
+  return match ? match[1].replace(/\s+/g, "") : "";
+}
+async function preloadPostcodeCoordinates(events) {
+  const codes = [...new Set(events.map(fullEventPostcode).filter(Boolean))];
+  if (!codes.length) return;
+  // postcodes.io supports bulk lookup. One request for all show postcodes,
+  // rather than making dozens of individual geocoding requests.
+  try {
+    for (let i = 0; i < codes.length; i += 100) {
+      const chunk = codes.slice(i, i + 100);
+      const response = await fetch("https://api.postcodes.io/postcodes", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ postcodes: chunk })
+      });
+      if (!response.ok) throw new Error(`Postcode service HTTP ${response.status}`);
+      const body = await response.json();
+      for (const row of body.result || []) {
+        const loc = row.result;
+        if (loc && Number.isFinite(loc.latitude) && Number.isFinite(loc.longitude))
+          postcodeCoordinates.set(String(row.query).replace(/\s+/g, "").toUpperCase(), [loc.latitude, loc.longitude]);
+      }
+    }
+    render();
+    if ($("accountDialog")?.open) renderAccount();
+  } catch (error) {
+    console.warn("Postcode coordinates unavailable; using approximate town locations:", error);
+  }
+}
+function eventCoordinatePrecision(e) {
+  return postcodeCoordinates.has(fullEventPostcode(e)) ? "postcode" : "town";
+}
+
 function coordsForEvent(e) {
+  const postcodeCoords = postcodeCoordinates.get(fullEventPostcode(e));
+  if (postcodeCoords) return postcodeCoords;
   const city = normalizePlace(e.city || e.location || "");
   if (PLACE_CENTRES[city]) return PLACE_CENTRES[city];
   const area = postcodeArea(e.postcode || e.address || e.venue || "");
@@ -417,6 +458,7 @@ function renderMap(events) {
     const popup = `<div class="map-popup">
       <strong>${esc(e.name || "Card show")}</strong>
       <div class="map-popup-meta">📅 ${esc(formatDate(e.date))}${e.city ? `<br>📍 ${esc(e.city)}` : ""}${distance != null ? `<br>📏 ~${esc(formatDistance(distance))} straight-line` : ""}</div>
+      <div class="map-popup-meta">⚠️ ${eventCoordinatePrecision(e) === "postcode" ? "Approximate postcode position" : "Approximate town position"} — not a verified venue entrance</div>
       <div class="map-popup-actions">
         <button type="button" class="popup-primary" onclick="openDetails('${escAttr(key)}')">View details</button>
         ${maps ? `<a href="${escAttr(maps)}" target="_blank" rel="noopener">Directions ↗</a>` : ""}
@@ -1459,6 +1501,7 @@ async function init() {
   const regions = [...new Set(currentEvents.map(e => e.region).filter(Boolean))].sort();
   $("regionSelect").innerHTML = `<option value="">All UK</option>` + regions.map(r => `<option value="${escAttr(r)}">${esc(regionName(r))}</option>`).join("");
   render();
+  preloadPostcodeCoordinates(currentEvents);
   if (supabaseClient) {
     supabaseClient.auth.onAuthStateChange(async (_event, session) => {
       currentUser = session?.user || null;
