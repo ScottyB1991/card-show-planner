@@ -1,3 +1,17 @@
+// Verified venue addresses for source records lacking full postcodes.
+// This fills gaps only; an existing event postcode always takes priority.
+function cardMapMissingPostcode(event) {
+  const name = String(event.name || "").toLowerCase();
+  const place = String(event.venue || event.address || "").toLowerCase();
+  if (name.includes("birmingham tcg show") || place.includes("quaid-e-azam")) return "B4 7XH";
+  if (name.includes("national card shows - swindon") || place.includes("delta tennis")) return "SN5 7XF";
+  if (name.includes("birmingham card show #") || place.includes("new bingley")) return "B18 5PP";
+  if (name.includes("guildford card show")) return "GU2 7AD";
+  if (name.includes("norwich card show #9") || place.includes("the forum, norwich")) return "NR2 1TF";
+  if (name.includes("derby card show #5") || place.includes("university of derby sports centre")) return "DE22 1GB";
+  return "";
+}
+
 const PROJECT_URL_DEFAULT = "https://fafkcpkhwjopelvkupwe.supabase.co";
 // PUBLIC browser key only. Paste your Supabase publishable key here before deploying v23.
 // Never use a secret/service-role key in frontend code.
@@ -116,7 +130,7 @@ const postcodeCoordinates = new Map();
 function fullEventPostcode(e) {
   const source = [e.postcode, e.address, e.venue].filter(Boolean).join(" ").toUpperCase();
   const match = source.match(/\b([A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2})\b/);
-  return match ? match[1].replace(/\s+/g, "") : "";
+  return match ? match[1].replace(/\s+/g, "") : cardMapMissingPostcode(e).replace(/\s+/g, "");
 }
 async function preloadPostcodeCoordinates(events) {
   const codes = [...new Set(events.map(fullEventPostcode).filter(Boolean))];
@@ -145,10 +159,15 @@ async function preloadPostcodeCoordinates(events) {
   }
 }
 function eventCoordinatePrecision(e) {
+  if (fullEventPostcode(e) === "HU12PS" &&
+      /connexin\s*live|bonus\s*arena/i.test(String(e.venue || e.address || ""))) return "venue";
   return postcodeCoordinates.has(fullEventPostcode(e)) ? "postcode" : "town";
 }
 
 function coordsForEvent(e) {
+  if (fullEventPostcode(e) === "HU12PS" &&
+      /connexin\s*live|bonus\s*arena/i.test(String(e.venue || e.address || "")))
+    return [53.74192, -0.34165];
   const postcodeCoords = postcodeCoordinates.get(fullEventPostcode(e));
   if (postcodeCoords) return postcodeCoords;
   const city = normalizePlace(e.city || e.location || "");

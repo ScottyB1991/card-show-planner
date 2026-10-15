@@ -23,11 +23,24 @@
   // Never use city-centre or postcode-area coordinates as venue destinations.
   // First look for the actual venue in OpenStreetMap, then use a postcode
   // centroid only as a clearly labelled approximate fallback.
+  // Verified venue addresses for source records lacking full postcodes.
+  // This fills gaps only; an existing event postcode always takes priority.
+  function cardMapMissingPostcode(event) {
+    const name = String(event.name || "").toLowerCase();
+    const place = String(event.venue || event.address || "").toLowerCase();
+    if (name.includes("birmingham tcg show") || place.includes("quaid-e-azam")) return "B4 7XH";
+    if (name.includes("national card shows - swindon") || place.includes("delta tennis")) return "SN5 7XF";
+    if (name.includes("birmingham card show #") || place.includes("new bingley")) return "B18 5PP";
+    if (name.includes("guildford card show")) return "GU2 7AD";
+    if (name.includes("norwich card show #9") || place.includes("the forum, norwich")) return "NR2 1TF";
+    if (name.includes("derby card show #5") || place.includes("university of derby sports centre")) return "DE22 1GB";
+    return "";
+  }
   const venueCache = new Map();
   function fullPostcode(event) {
     const text = [event.postcode, event.venue, event.address].filter(Boolean).join(" ");
     const match = text.toUpperCase().match(/\b([A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2})\b/);
-    return match ? match[1].replace(/\s+/g, "").replace(/(.{3})$/, " $1") : "";
+    return match ? match[1].replace(/\s+/g, "").replace(/(.{3})$/, " $1") : cardMapMissingPostcode(event);
   }
   function milesBetween(a, b) {
     const r = Math.PI / 180, dLat = (b[0] - a[0]) * r, dLon = (b[1] - a[1]) * r;
@@ -52,7 +65,8 @@
     } catch (_) { return null; }
   }
   async function venueLocation(event, postcodeCoords) {
-    const name = String(event.venue || event.address || "").replace(/\b[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}\b/gi, "").trim();
+    const knownName = cardMapMissingPostcode(event) && /guildford card show/i.test(String(event.name || "")) ? "Surrey Sports Park" : "";
+    const name = String(knownName || event.venue || event.address || "").replace(/\b[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}\b/gi, "").trim();
     const city = String(event.city || event.location || "").trim();
     const terms = venueTerms(event);
     if (!name || !city || !terms.length) return null;
@@ -70,7 +84,7 @@
           const label = String(item.display_name || "").toLowerCase();
           // Do not mistake a matching city or generic word for the venue.
           const matched = terms.filter(term => label.includes(term));
-          if (matched.length < Math.min(2, terms.length)) continue;
+          if (terms.length < 2 || matched.length < 2) continue;
           // If the event postcode is valid, reject implausibly distant matches.
           if (postcodeCoords && milesBetween(coords, postcodeCoords) > 3) continue;
           return { coords, exact: true };
@@ -84,12 +98,19 @@
     const cacheKey = [event.venue, event.city, postcode].join("|");
     if (venueCache.has(cacheKey)) return venueCache.get(cacheKey);
     const pending = (async () => {
+      // Verified building footprint: Connexin Live (formerly Bonus Arena),
+      // Myton Street, Hull HU1 2PS. Not an entrance or car access point.
+      if (postcode.replace(/\s/g, "").toUpperCase() === "HU12PS" &&
+          /connexin\s*live|bonus\s*arena/i.test(String(event.venue || event.address || ""))) {
+        return { coords: [53.74192, -0.34165], exact: true };
+      }
       const postcodeCoords = await postcodeLocation(postcode);
       const venue = await venueLocation(event, postcodeCoords);
       if (venue) return venue;
       return postcodeCoords ? { coords: postcodeCoords, exact: false } : null;
     })();
     venueCache.set(cacheKey, pending);
+    pending.then(result => { if (!result) venueCache.delete(cacheKey); }, () => venueCache.delete(cacheKey));
     return pending;
   }
 
@@ -123,7 +144,7 @@
         <button type="button" class="trip-locate-btn">◎ <span>Show my location</span></button>
         <button type="button" class="trip-route-btn">🚗 <span>Route me there</span></button>
       </div>
-      <div class="trip-route-summary" hidden></div>
+      <div class="trip-route-summary" hidden style="display:none!important"></div>
       <div class="trip-planner-actions">
         <a href="${tripSearchUrl("parking", event)}" target="_blank" rel="noopener">🅿️ <span>Parking</span></a>
         <a href="${tripSearchUrl("food", event)}" target="_blank" rel="noopener">🍔 <span>Food</span></a>
@@ -169,7 +190,7 @@
       const venueMarker = L.marker(destination).addTo(tripMap);
       // Do not auto-open an oversized popup over the small mobile map.
       venueMarker.bindPopup(venueExact
-        ? "Venue location (verify before travelling)"
+        ? "Matched venue location (entrance not verified)"
         : "Approximate postcode centre (not the venue entrance)", { maxWidth: 200 });
       setTimeout(() => tripMap?.invalidateSize(), 100);
       if (navigator.geolocation) {
@@ -182,7 +203,7 @@
     const locateBtn = planner.querySelector(".trip-locate-btn");
     const routeBtn = planner.querySelector(".trip-route-btn");
     const routeSummary = planner.querySelector(".trip-route-summary");
-    if (routeSummary) routeSummary.hidden = true;
+    if (routeSummary) { routeSummary.hidden = true; routeSummary.style.setProperty("display", "none", "important"); }
     let myCoords = null;
     let routeLayer = null;
 
@@ -224,7 +245,7 @@
     routeBtn?.addEventListener("click", async () => {
       routeBtn.disabled = true;
       routeBtn.innerHTML = '⌛ <span>Finding route…</span>';
-      if (routeSummary) routeSummary.hidden = true;
+      if (routeSummary) { routeSummary.hidden = true; routeSummary.style.setProperty("display", "none", "important"); }
 
       try {
         if (!destination) throw new Error("Destination unavailable");
@@ -255,6 +276,7 @@
         if (routeSummary) {
           routeSummary.innerHTML = `<strong>🚗 ${miles.toFixed(miles < 10 ? 1 : 0)} miles</strong><span>Approx. ${time} driving</span><small>${venueExact ? "Venue location matched; entrance not verified" : "⚠️ Route ends at approximate postcode centre, NOT the venue entrance. Verify with Open in Maps before travelling."} · OSRM / OpenStreetMap</small>`;
           routeSummary.hidden = false;
+          routeSummary.style.setProperty("display", "grid", "important");
 
         }
         routeBtn.innerHTML = '✓ <span>Route shown</span>';
@@ -262,6 +284,7 @@
         if (routeSummary) {
           routeSummary.innerHTML = '<strong>Route unavailable right now</strong><span>Please try again shortly.</span>';
           routeSummary.hidden = false;
+          routeSummary.style.setProperty("display", "grid", "important");
 
         }
         routeBtn.innerHTML = '🚗 <span>Route me there</span>';
